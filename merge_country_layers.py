@@ -22,34 +22,34 @@ target_fc_name = "logging"
 cmr = {
     'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\CMR\\CMR_Atlas 2014 data.gdb\\Forest_management",  # full path to input workspace, escape backslashes (\) with another backslash
     'input_fc_name': "CMR_ufa_2014",  # input feature_class name
-    'country_code': 'CMR',  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
-    'layer_type': 'FMU',  # feature type, use when fields{'type'] is None, otherwise type None
-    'where_clause': "VALIDITE = 'V'",  # to use entire dataset type None
-    'transformation': None,  # specify geographic transformation (if necessary, otherwise type None). Features will be projected to WGS_1984_Web_Mercator_Auxiliary_Sphere
+    'country_code': "CMR",  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
+    'layer_type': "FMU",  # feature type, use when fields{'type'] is None, otherwise type None
+    'where_clause': "VALIDITE = 'V'",  # to use entire dataset type "", string expressions within the where clause must be with single quotes
+    'transformation': "",  # specify geographic transformation (if necessary, otherwise type ""). Features will be projected to WGS_1984_Web_Mercator_Auxiliary_Sphere
     'fields': {
-        'type': None,  # if field is not provided type None
-        'company': 'ATTRIBUTAI',  # if field is provided type field name (case sensitive!)
-        'group': 'GROUPE_PAR',  # if field is provided type field name (case sensitive!)
-        'area': 'SUP_SIG',  # if field is provided type field name (case sensitive!)
-        'shape_length': 'Shape_Length',  # if field is provided type field name (case sensitive!)
-        'shape_area': 'Shape_Area'  # if field is provided type field name (case sensitive!)
+        'type': "",  # if field is not provided type ""
+        'company': "ATTRIBUTAI",  # if field is provided type field name (case sensitive!)
+        'group': "GROUPE_PAR",  # if field is provided type field name (case sensitive!)
+        'area': "SUP_SIG",  # if field is provided type field name (case sensitive!)
+        'shape_length': "Shape_Length",  # if field is provided type field name (case sensitive!)
+        'shape_area': "Shape_Area"  # if field is provided type field name (case sensitive!)
     }
 }
 
 gab = {
     'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\GAB\\gabon_2013.gdb\\amenagement_forestier",  # full path to input workspace, escape backslashes (\) with another backslash
     'input_fc_name': "gab_CFAD",  # input feature_class name
-    'country_code': 'GAB',  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
-    'layer_type': 'CFAD',  # feature type, use when fields{'type'] is None, otherwise type None
-    'where_clause': "",  # to use entire dataset type ""
-    'transformation': None,  # specify geographic transformation (if necessary, otherwise type None). Features will be projected to WGS_1984_Web_Mercator_Auxiliary_Sphere
+    'country_code': "GAB",  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
+    'layer_type': "CFAD",  # feature type, use when fields{'type'] is None, otherwise type ""
+    'where_clause': "",  # to use entire dataset type "", string expressions within the where clause must be with single quotes
+    'transformation': "",  # specify geographic transformation (if necessary, otherwise type ""). Features will be projected to WGS_1984_Web_Mercator_Auxiliary_Sphere
     'fields': {
-        'type': None,  # if field is not provided type None
-        'company': 'nom_ste',  # if field is provided type field name (case sensitive!)
-        'group': 'grp_ste',  # if field is provided type field name (case sensitive!)
-        'area': 'sup_sig',  # if field is provided type field name (case sensitive!)
-        'shape_length': 'Shape_Length',  # if field is provided type field name (case sensitive!)
-        'shape_area': 'Shape_Area'  # if field is provided type field name (case sensitive!)
+        'type': "",  # if field is not provided type ""
+        'company': "nom_ste",  # if field is provided type field name (case sensitive!)
+        'group': "grp_ste",  # if field is provided type field name (case sensitive!)
+        'area': "sup_sig",  # if field is provided type field name (case sensitive!)
+        'shape_length': "Shape_Length",  # if field is provided type field name (case sensitive!)
+        'shape_area': "Shape_Area"  # if field is provided type field name (case sensitive!)
     }
 }
 
