@@ -9,18 +9,22 @@
 # Import arcpy module
 import arcpy
 import os
+import archiver
+import glob
 
 #Target workspace and name of taget feature class
 #Target workspace should be a file-geodatabase
 
 target_ws = "C:\\Users\\Thomas.Maschler\\Documents\\test.gdb"
 target_fc_name = "logging"
+scratch_folder = "C:\\temp"
 
 #Define country specific parameters
 #Follow the same schema to add new country layers
 
 cmr = {
-    'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\CMR\\CMR_Atlas 2014 data.gdb\\Forest_management",  # full path to input workspace, escape backslashes (\) with another backslash
+    'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\CMR\\CMR_Atlas 2014 data.gdb",  # full path to input workspace, escape backslashes (\) with another backslash
+    'input_ds': "Forest_management",  # name of feature dataset, if no feaure class not in a feature dataset type ""
     'input_fc_name': "CMR_ufa_2014",  # input feature_class name
     'country_code': "CMR",  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
     'layer_type': "FMU",  # feature type, use when fields{'type'] is None, otherwise type None
@@ -37,7 +41,8 @@ cmr = {
 }
 
 gab = {
-    'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\GAB\\gabon_2013.gdb\\amenagement_forestier",  # full path to input workspace, escape backslashes (\) with another backslash
+    'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\GAB\\gabon_2013.gdb",  # full path to input workspace, escape backslashes (\) with another backslash
+    'input_ds': "amenagement_forestier",  # name of feature dataset, if no feaure class not in a feature dataset type ""
     'input_fc_name': "gab_CFAD",  # input feature_class name
     'country_code': "GAB",  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
     'layer_type': "CFAD",  # feature type, use when fields{'type'] is None, otherwise type ""
@@ -65,7 +70,6 @@ target_layer = '%s_layer' % target_fc_name
 arcpy.env.overwriteOutput = True
 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
 
-
 # Process: Delete Features
 # Deletes all features in target feature class
 arcpy.DeleteFeatures_management(target_fc)
@@ -74,13 +78,16 @@ arcpy.DeleteFeatures_management(target_fc)
 # Compact target file-geodatabase to avoid running out of ObjectIDs
 arcpy.Compact_management(target_ws)
 
+
 #Add features, one country at a time
+
+
 
 for country in countries:
     if country['transformation']:
         arcpy.env.geographicTransformations = country['transformation']
     # Process: Make Feature Layer
-    input_fc  = os.path.join(country['input_ws'], country['input_fc_name'])
+    input_fc = os.path.join(os.path.join(country['input_ws'], country['input_ds'], country['input_fc_name']))
     input_layer = os.path.basename('%s_layer') % input_fc
 
     arcpy.MakeFeatureLayer_management(input_fc,
@@ -168,6 +175,19 @@ for country in countries:
 # Execute FeatureClassToShapefile_conversion
 # Export FeatureClass to Shapefile
 
-scratch_folder = "C:\\temp"
+
 arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
+
+target_shp = os.path.join(scratch_folder, "%s.shp" % target_fc_name)
+target_zip = os.path.join(scratch_folder, "%s.zip" % target_fc_name)
+#s3_zip = os.path.join("data", "%s.zip" % target_fc_name)
+s3_zip = "%s.zip" % target_fc_name
+
+
+archiver.main(target_shp, target_zip, s3_zip, 'gfw2_download')
+
+targets_rm = os.path.join(scratch_folder, "%s.*" % target_fc_name)
+r = glob.glob(targets_rm)
+for i in r:
+   os.remove(i)
 
