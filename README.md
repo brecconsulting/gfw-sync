@@ -5,7 +5,8 @@ Synchronization stuff for easier management of GFW data
 
 ### merge_country_layers.py
 
-This python script merges features from different feature classes into one feature class.
+This python script merges features from different feature classes into one feature class and exports it as shape file.
+It calls archiver.py and uploads shapefile to S3.
 
 #### Configuration
 
@@ -58,15 +59,15 @@ export AWS_SECRET_ACCESS_KEY="<secret key>"
 On Windows:
 
 1. Create your file with the name you want(e.g boto_config.cfg) and place it in a location of your choice (e.g C:\Users\<your_account_name>\configs).
-
 2. Specify your credentials in the credential section of your file:
+
 ```python
 [Credentials]
 aws_access_key_id = <access id>
 aws_secret_access_key = <secret key>"
 ```
-3. Create an environment variable with the Name='BOTO_CONFIG' and Value= file_locatio/file_name
 
+3. Create an environment variable with the Name='BOTO_CONFIG' and Value= file_locatio/file_name
 4. Boto is now ready to work with credentials automatically configured!
 
 
