@@ -11,7 +11,7 @@ This python script merges features from different feature classes into one featu
 
 Input feature classes can be configured within the script
 
-```shell
+```python
 input_feature_class = {
     'input_ws': "full_path_to_gdb",  # full path to input workspace, escape backslashes (\) with another backslash
     'input_ds': "dataset_name",  # name of feature dataset, if no feaure class not in a feature dataset type ""
@@ -33,7 +33,7 @@ input_feature_class = {
 
 afterwards add input file to country list
 
-```shell
+```python
 countries = [input_feature_class1, input_feature_class2, ...]
 ```
 
@@ -57,17 +57,17 @@ export AWS_SECRET_ACCESS_KEY="<secret key>"
 
 On Windows:
 
-1- Create your file with the name you want(e.g boto_config.cfg) and place it in a location of your choice (e.g C:\Users\<your_account_name>\configs).
+1. Create your file with the name you want(e.g boto_config.cfg) and place it in a location of your choice (e.g C:\Users\<your_account_name>\configs).
 
-2- Specify your credentials in the credential section of your file:
-```shell
+2. Specify your credentials in the credential section of your file:
+```python
 [Credentials]
 aws_access_key_id = <access id>
 aws_secret_access_key = <secret key>"
 ```
-3- Create an environment variable with the Name='BOTO_CONFIG' and Value= file_locatio/file_name
+3. Create an environment variable with the Name='BOTO_CONFIG' and Value= file_locatio/file_name
 
-4- Boto is now ready to work with credentials automatically configured!
+4. Boto is now ready to work with credentials automatically configured!
 
 
 #### Usage
