@@ -3,46 +3,89 @@ gfw-sync
 
 Synchronization stuff for easier management of GFW data
 
-### merge_country_layers.py
+### merge_layers.py
 
 This python script merges features from different feature classes into one feature class and exports it as shape file.
+In- and output features are defined in separate config file, found in config folder
 It calls archiver.py and uploads shapefile to S3.
 
-#### Configuration
 
-Input feature classes can be configured within the script
+#### Usage
+
+use shell, you must add an argument which config file to use
+
+```shell
+python merge_layers.py logging
+```
+
+
+
+### config/any_name.py
+
+Config files live in the config folder and must have suffix .py
+You can add as many config files as you want.
+
+All config files must have two functions "target()" and "layers()"
+Target() function must return a list with four values
+1) Target Workspace
+2) Target Feature Class
+3) Scratch Folder
+4) S3 Bucket
+
+Layers() function must return a list with layers.
+Layers are dictonaries with
+1) input Workspace
+2) Input Dataset
+3) Input Feature Class
+4) Where clause
+5) Transformation
+6) Fields
+
+Where Fields is a Dictionary with target fieldnames and their input field names or values
+There must be at least a field called "country" for any target dataset
+
+
+#### Logging
+
+Logging layers must follow the following schema
 
 ```python
-input_feature_class = {
-    'input_ws': "full_path_to_gdb",  # full path to input workspace, escape backslashes (\) with another backslash
-    'input_ds': "dataset_name",  # name of feature dataset, if no feaure class not in a feature dataset type ""
-    'input_fc_name': "feature_class_name",  # input feature_class name
-    'country_code': "ISO_3166-1 Code",  # use three letter country code (http://en.wikipedia.org/wiki/ISO_3166-1)
-    'layer_type': "layer type",  # feature type, use when fields{'type'] is None, otherwise type None
-    'where_clause': "SQL style where clause",  # to use entire dataset type "", string expressions within the where clause must be with single quotes
-    'transformation': "ArcGIS transformation name",  # specify geographic transformation (if necessary, otherwise type ""). Features will be projected to WGS_1984_Web_Mercator_Auxiliary_Sphere
-    'fields': {
-        'type': "type field name",  # if field is not provided type ""
-        'company': "company field name",  # if field is provided type field name (case sensitive!)
-        'group': "group field name",  # if field is provided type field name (case sensitive!)
-        'area': "area field name",  # if field is provided type field name (case sensitive!)
-        'shape_length': "shape length field name",  # if field is provided type field name (case sensitive!)
-        'shape_area': "shape area field name"  # if field is provided type field name (case sensitive!)
+    layer_name = {
+        'input_ws': "",  # Absolute path to Folder or GDB. Backslashes must be escaped by another backslash (\\)
+        'input_ds': "",  # Name of Feature Dataset, leave empty quotes ("") if no Feature Dataset is used
+        'input_fc_name': "",  # Name of Feature Class or Shapefile
+        'where_clause': "",  # Filter statement (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
+        'transformation': "",  # ArcGIS transformation. Leave empty quotes ("") or type None (without quotes) if no transformation is needed
+        'fields': {
+
+            # for all fields:
+            # if corresponding field exists type ["field", "fieldname"], fieldname is case sensitive!
+            # if you want to add a fixed value for all fields type ["value", "some text"]
+            # id you want to leave the field blank type None (without quotes and squared brackets)
+
+            'country': [],  # should always be["value", "3 letter ISO-Code"],
+            'year': [],  #  should always be ["value", now.year]
+            'type': [],
+            'name': [],
+            'company': [],
+            'group_company': [],
+            'group_country': [],
+            'province': [],
+            'status': [],
+            'area_ha': [],
+            'source': [],
+            'shape_length': [],
+            'shape_area': []
+        }
     }
-}
 ```
 
 afterwards add input file to country list
 
 ```python
-countries = [input_feature_class1, input_feature_class2, ...]
+countries = [layer_name_1, layer_name_2, ...]
 ```
 
-#### Usage
-
-```shell
-python merge_country_layers.py
-```
 
 
 ### Archiver.py
