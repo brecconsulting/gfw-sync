@@ -27,19 +27,19 @@ You can add as many config files as you want.
 
 All config files must have two functions "target()" and "layers()"
 Target() function must return a list with four values
-1) Target Workspace
-2) Target Feature Class
-3) Scratch Folder
-4) S3 Bucket
+1. Target Workspace
+2. Target Feature Class
+3. Scratch Folder
+4. S3 Bucket
 
 Layers() function must return a list with layers.
 Layers are dictonaries with
-1) input Workspace
-2) Input Dataset
-3) Input Feature Class
-4) Where clause
-5) Transformation
-6) Fields
+1. Input Workspace
+2. Input Dataset
+3. Input Feature Class
+4. Where clause
+5. Transformation
+6. Fields
 
 Where Fields is a Dictionary with target fieldnames and their input field names or values
 There must be at least a field called "country" for any target dataset
