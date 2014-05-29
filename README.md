@@ -27,6 +27,7 @@ You can add as many config files as you want.
 
 All config files must have two functions "target()" and "layers()"
 Target() function must return a list with four values
+
 1. Target Workspace
 2. Target Feature Class
 3. Scratch Folder
@@ -34,6 +35,7 @@ Target() function must return a list with four values
 
 Layers() function must return a list with layers.
 Layers are dictonaries with
+
 1. Input Workspace
 2. Input Dataset
 3. Input Feature Class
