@@ -12,10 +12,16 @@ It calls archiver.py and uploads shapefile to S3.
 
 #### Usage
 
-use shell, you must add an argument which config file to use
-
+Command line
 ```shell
 python merge_layers.py logging
+```
+
+
+Python:
+```python
+>>> import merge_layers
+>>> merge_layers.merge('logging')
 ```
 
 

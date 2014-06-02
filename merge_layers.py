@@ -31,96 +31,100 @@ def create_field_map(input_name, layer, field):
 
     return fm
 
-# import config file given in system argument
-config = import_module('config.' + sys.argv[1])
+def merge(mlayer):
+    # import config file given in system argument
+    config = import_module('config.' + mlayer)
 
-# get config settings
-target_ws, target_fc_name, scratch_folder, s3_bucket = config.target()
-layers = config.layers()
+    # get config settings
+    target_ws, target_fc_name, scratch_folder, s3_bucket = config.target()
+    layers = config.layers()
 
-#define name for target feature class and target feature layer
-target_fc = os.path.join(target_ws, target_fc_name)
-target_layer = '%s_layer' % target_fc_name
+    #define name for target feature class and target feature layer
+    target_fc = os.path.join(target_ws, target_fc_name)
+    target_layer = '%s_layer' % target_fc_name
 
-# set environment parameters
-arcpy.env.overwriteOutput = True
-arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
+    # set environment parameters
+    arcpy.env.overwriteOutput = True
+    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
 
-# Deletes all features in target feature class
-arcpy.DeleteFeatures_management(target_fc)
+    # Deletes all features in target feature class
+    arcpy.DeleteFeatures_management(target_fc)
 
-# Compact target file-geodatabase to avoid running out of ObjectIDs
-arcpy.Compact_management(target_ws)
+    # Compact target file-geodatabase to avoid running out of ObjectIDs
+    arcpy.Compact_management(target_ws)
 
-#Add features, one layer at a time
-for layer in layers:
+    #Add features, one layer at a time
+    for layer in layers:
 
-    try:
-        print "Adding " + layer['input_fc_name']
-
-
-        # define transformation
-        if layer['transformation']:
-            arcpy.env.geographicTransformations = layer['transformation']
-
-        # create feature layer from feature class
-        input_fc = os.path.join(os.path.join(layer['input_ws'], layer['input_ds'], layer['input_fc_name']))
-        input_layer = os.path.basename('%s_layer') % input_fc
-
-        arcpy.MakeFeatureLayer_management(input_fc,
-                                          input_layer,
-                                          layer['where_clause'],
-                                          "",
-                                          "")
-
-        # map fields
-        fms = arcpy.FieldMappings()
-
-        for field in layer['fields']:
-            if layer['fields'][field]:
-                if layer['fields'][field][0] == 'field':
-                     fms.addFieldMap(create_field_map(input_layer, layer, field))
-
-        # append layer to target feature class
-        arcpy.Append_management(input_layer,
-                                target_fc,
-                                "NO_TEST",
-                                fms,
-                                "")
-
-        # Update field values, for un-mapped fields
-        for field in layer['fields']:
-            if layer['fields'][field]:
-                if layer['fields'][field][0] == 'value':
-                    arcpy.MakeFeatureLayer_management(target_fc,
-                                                      target_layer,
-                                                      "country IS NULL OR country = '%s'" % layer['fields']['country'][1],
-                                                      "",
-                                                      "")
-                    arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
-
-        # reset transformation
-        arcpy.env.geographicTransformations = ""
-
-    except:
-        print "Failed to add " + layer['input_fc_name']
-        traceback.print_exc()
+        try:
+            print "Adding " + layer['input_fc_name']
 
 
-# Export FeatureClass to Shapefile
-arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
+            # define transformation
+            if layer['transformation']:
+                arcpy.env.geographicTransformations = layer['transformation']
 
-# zip shapefile and push to Amazon S3 using archiver.py script
-target_shp = os.path.join(scratch_folder, "%s.shp" % target_fc_name)
-target_zip = os.path.join(scratch_folder, "%s.zip" % target_fc_name)
-#s3_zip = os.path.join("data", "%s.zip" % target_fc_name)
-s3_zip = "%s.zip" % target_fc_name
+            # create feature layer from feature class
+            input_fc = os.path.join(os.path.join(layer['input_ws'], layer['input_ds'], layer['input_fc_name']))
+            input_layer = os.path.basename('%s_layer') % input_fc
 
-archiver.main(target_shp, target_zip, s3_zip, s3_bucket)
+            arcpy.MakeFeatureLayer_management(input_fc,
+                                              input_layer,
+                                              layer['where_clause'],
+                                              "",
+                                              "")
 
-# clean up, delete shapefiles and zipfile
-targets_rm = os.path.join(scratch_folder, "%s.*" % target_fc_name)
-r = glob.glob(targets_rm)
-for i in r:
-    os.remove(i)
+            # map fields
+            fms = arcpy.FieldMappings()
 
+            for field in layer['fields']:
+                if layer['fields'][field]:
+                    if layer['fields'][field][0] == 'field':
+                         fms.addFieldMap(create_field_map(input_layer, layer, field))
+
+            # append layer to target feature class
+            arcpy.Append_management(input_layer,
+                                    target_fc,
+                                    "NO_TEST",
+                                    fms,
+                                    "")
+
+            # Update field values, for un-mapped fields
+            for field in layer['fields']:
+                if layer['fields'][field]:
+                    if layer['fields'][field][0] == 'value':
+                        arcpy.MakeFeatureLayer_management(target_fc,
+                                                          target_layer,
+                                                          "country IS NULL OR country = '%s'" % layer['fields']['country'][1],
+                                                          "",
+                                                          "")
+                        arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
+
+            # reset transformation
+            arcpy.env.geographicTransformations = ""
+
+        except:
+            print "Failed to add " + layer['input_fc_name']
+            traceback.print_exc()
+
+
+    # Export FeatureClass to Shapefile
+    arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
+
+    # zip shapefile and push to Amazon S3 using archiver.py script
+    target_shp = os.path.join(scratch_folder, "%s.shp" % target_fc_name)
+    target_zip = os.path.join(scratch_folder, "%s.zip" % target_fc_name)
+    #s3_zip = os.path.join("data", "%s.zip" % target_fc_name)
+    s3_zip = "%s.zip" % target_fc_name
+
+    archiver.main(target_shp, target_zip, s3_zip, s3_bucket)
+
+    # clean up, delete shapefiles and zipfile
+    targets_rm = os.path.join(scratch_folder, "%s.*" % target_fc_name)
+    r = glob.glob(targets_rm)
+    for i in r:
+        os.remove(i)
+
+if __name__ == '__main__':
+
+    print merge(sys.argv[1])
