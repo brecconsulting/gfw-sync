@@ -37,7 +37,7 @@ def zip(shp, dst):
     for dirname, subdirs, files in os.walk(basepath):
         print 'Zipping %s' % shp
         for f in files:
-            if base_fname in f: # only process components of specified shapefile
+            if (base_fname in f) and (f != dest):  # only process components of specified shapefile
                 add_to_zip(dirname, f, zf)
 
     zf.close()
