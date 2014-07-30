@@ -6,7 +6,7 @@ Synchronization stuff for easier management of GFW data
 ### merge_layers.py
 
 This python script merges features from different feature classes into one feature class and exports it as shape file.
-In- and output features are defined in separate config file, found in config folder
+In- and output features are defined in separate layer files, found in layers folder
 It calls archiver.py and uploads shapefile to S3.
 
 
@@ -26,12 +26,12 @@ Python:
 
 
 
-### config/any_name.py
+### layers/any_name.py
 
-Config files live in the config folder and must have suffix .py
-You can add as many config files as you want.
+Layer files live in the layer folder and must have suffix .py
+You can add as many layer files as you want.
 
-All config files must have two functions "target()" and "layers()"
+All layer files must have two functions "target()" and "layers()"
 Target() function must return a list with four values
 
 1. Target Workspace
@@ -64,6 +64,11 @@ Logging layers must follow the following schema
         'input_fc_name': "",  # Name of Feature Class or Shapefile
         'where_clause': "",  # Filter statement (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
         'transformation': "",  # ArcGIS transformation. Leave empty quotes ("") or type None (without quotes) if no transformation is needed
+        'update': {
+            # optional, can be either:
+            'replication': ['gdb1','replication_name', 'gdb2', 'output_projection (optional)', 'transformation (optional)"], # optional
+            'routine': 'custom_module' # optional
+            }
         'fields': {
 
             # for all fields:
@@ -82,8 +87,8 @@ Logging layers must follow the following schema
             'status': [],
             'area_ha': [],
             'source': [],
-            'shape_length': [],
-            'shape_area': []
+            'shape_length': [],  # optional
+            'shape_area': []  # optional
         }
     }
 ```
