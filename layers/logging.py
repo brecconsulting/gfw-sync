@@ -31,8 +31,6 @@ def layers():
             'status': ["field", "STATUT"],
             'area_ha': ["field", "SUP_SIG"],
             'source': ["value", "MINFOF 2013"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
         }
     }
 
@@ -55,8 +53,6 @@ def layers():
             'status': ["field", "STATUT"],
             'area_ha': ["field", "SUP_SIG"],
             'source': ["value", "MINFOF 2013"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
         }
     }
 
@@ -79,8 +75,6 @@ def layers():
             'status': None,
             'area_ha': ["field", "sup_sig"],
             'source': ["value", "MINEF"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
         }
     }
 
@@ -103,8 +97,6 @@ def layers():
             'status': None,
             'area_ha': ["field", "sup_sig"],
             'source': ["value", "MINEF"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
         }
     }
 
