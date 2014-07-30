@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------
 # merge_layers.py
 # Created on: 2014-05-21 09:48:06.00000
@@ -33,7 +34,7 @@ def create_field_map(input_name, layer, field):
 
 def merge(mlayer):
     # import config file given in system argument
-    config = import_module('config.' + mlayer)
+    config = import_module('layers.' + mlayer)
 
     # get config settings
     target_ws, target_fc_name, scratch_folder, s3_bucket = config.target()
@@ -56,9 +57,38 @@ def merge(mlayer):
     #Add features, one layer at a time
     for layer in layers:
 
+        # update source dataset
         try:
-            print "Adding " + layer['input_fc_name']
+            try:
+                if layer['update']['replication']:
+                    #print "update source file" + layer['input_fc_name']
+                    gdb1 = layer['update']['replication'][0]
+                    replica = layer['update']['replication'][1]
+                    gdb2 = layer['update']['replication'][2]
 
+                    default_trans = arcpy.env.geographicTransformations
+                    defautl_outCoorSys = arcpy.env.outputCoordinateSystem
+                    if len(layer['update']['replication']) >= 3:
+                        arcpy.env.geographicTransformations = layer['update']['replication'][3]
+                    if len(layer['update']['replication']) >= 4:
+                        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layer['update']['replication'][4])
+
+                    arcpy.SynchronizeChanges_management(gdb1, replica, gdb2, "FROM_GEODATABASE1_TO_2", "IN_FAVOR_OF_GDB1", "BY_OBJECT", "DO_NOT_RECONCILE")
+
+                    arcpy.env.geographicTransformations = default_trans
+                    arcpy.env.outputCoordinateSystem = defautl_outCoorSys
+                    
+            except KeyError:
+                try:
+                    if layer['update']['routine']:
+                        cmod = import_module('config.' + layer['update']['routine'])
+                        print cmod.execute()
+
+                except KeyError:
+                    pass
+
+
+            print "Adding " + layer['input_fc_name']
 
             # define transformation
             if layer['transformation']:
