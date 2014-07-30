@@ -24,9 +24,6 @@ def layers():
         'input_fc_name': "CMR_ufa",
         'where_clause': "",
         'transformation': None,
-        'public_url': 'http://candan.org/download',
-        'create_zip': yes,
-        'fields': {
             'country': ["value", "CMR"],
             'year': ["value", now.year],
             'type': ["value", "FMU"],
