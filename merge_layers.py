@@ -15,6 +15,9 @@ import glob
 import sys
 import traceback
 
+from config import settings
+
+
 def import_module(name):
     mod = __import__(name)
     components = name.split('.')
@@ -22,8 +25,8 @@ def import_module(name):
         mod = getattr(mod, comp)
     return mod
 
-def create_field_map(input_name, layer, field):
 
+def create_field_map(input_name, layer, field):
     fm = arcpy.FieldMap()
     fm.addInputField(input_name, layer['fields'][field][1])
     output_field = fm.outputField
@@ -32,13 +35,37 @@ def create_field_map(input_name, layer, field):
 
     return fm
 
-def merge(mlayer):
-    # import config file given in system argument
-    config = import_module('layers.' + mlayer)
 
-    # get config settings
-    target_ws, target_fc_name, scratch_folder, s3_bucket = config.target()
-    layers = config.layers()
+def empty_strings2null(fclass):
+    desc = arcpy.Describe(fclass)
+    if desc.dataType == 'FeatureClass':
+        string_fields = [f.name for f in arcpy.ListFields(fclass, None, 'String')]
+        for string_field in string_fields:
+            arcpy.MakeFeatureLayer_management(fclass,
+                                              "update_layer",
+                                              '"%s" = \'\'' % string_field,
+                                              "",
+                                              "")
+            arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
+
+
+def merge(mlayer):
+    # import layer file given in system argument
+    global input_fc
+
+    try:
+        import_layers = import_module('layers.' + mlayer)
+    except ImportError:
+        return "Warning: Layer %s is not defined" % mlayer
+
+    # get layer settings
+    target_ws = settings.get_target_gdb()
+    target_fc_name = mlayer
+    scratch_folder = settings.get_scratch_folder()
+    s3_bucket = settings.get_download_bucket()
+    bucket_drives = settings.get_bucket_drive()
+
+    layers = import_layers.layers()
 
     #define name for target feature class and target feature layer
     target_fc = os.path.join(target_ws, target_fc_name)
@@ -57,85 +84,99 @@ def merge(mlayer):
     #Add features, one layer at a time
     for layer in layers:
 
-        # update source dataset
-        try:
-            try:
-                if layer['update']['replication']:
-                    #print "update source file" + layer['input_fc_name']
-                    gdb1 = layer['update']['replication'][0]
-                    replica = layer['update']['replication'][1]
-                    gdb2 = layer['update']['replication'][2]
+        #try:
 
-                    default_trans = arcpy.env.geographicTransformations
-                    defautl_outCoorSys = arcpy.env.outputCoordinateSystem
-                    if len(layer['update']['replication']) >= 3:
-                        arcpy.env.geographicTransformations = layer['update']['replication'][3]
-                    if len(layer['update']['replication']) >= 4:
-                        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layer['update']['replication'][4])
+        # # update source dataset
+        #     try:
+        #         if layer['update']['replication']:
+        #             #print "update source file" + layer['input_fc_name']
+        #             gdb1 = layer['update']['replication'][0]
+        #             replica = layer['update']['replication'][1]
+        #             gdb2 = layer['update']['replication'][2]
+        #
+        #             default_trans = arcpy.env.geographicTransformations
+        #             defautl_outCoorSys = arcpy.env.outputCoordinateSystem
+        #             if len(layer['update']['replication']) >= 3:
+        #                 arcpy.env.geographicTransformations = layer['update']['replication'][3]
+        #             if len(layer['update']['replication']) >= 4:
+        #                 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layer['update']['replication'][4])
+        #
+        #             arcpy.SynchronizeChanges_management(gdb1, replica, gdb2, "FROM_GEODATABASE1_TO_2", "IN_FAVOR_OF_GDB1", "BY_OBJECT", "DO_NOT_RECONCILE")
+        #
+        #             arcpy.env.geographicTransformations = default_trans
+        #             arcpy.env.outputCoordinateSystem = defautl_outCoorSys
+        #
+        #     except KeyError:
+        #         try:
+        #             if layer['update']['routine']:
+        #                 cmod = import_module('layers.' + layer['update']['routine'])
+        #                 print cmod.execute()
+        #
+        #         except KeyError:
+        #             pass
 
-                    arcpy.SynchronizeChanges_management(gdb1, replica, gdb2, "FROM_GEODATABASE1_TO_2", "IN_FAVOR_OF_GDB1", "BY_OBJECT", "DO_NOT_RECONCILE")
+        print "Adding " + layer['input_fc_name']
 
-                    arcpy.env.geographicTransformations = default_trans
-                    arcpy.env.outputCoordinateSystem = defautl_outCoorSys
-                    
-            except KeyError:
-                try:
-                    if layer['update']['routine']:
-                        cmod = import_module('config.' + layer['update']['routine'])
-                        print cmod.execute()
+        # define transformation
+        if layer['transformation']:
+            arcpy.env.geographicTransformations = layer['transformation']
 
-                except KeyError:
-                    pass
+        # create feature layer from feature class
 
+        if layer['location'].lower() == 'server':
+            input_fc = os.path.join(layer['input_ws'], layer['input_ds'], layer['input_fc_name'])
+        elif layer['location'] == 's3':
+            input_fc = os.path.join(layer['bucket'][bucket_drives], layer['input_ws'], layer['input_ds'],
+                                    layer['input_fc_name'])
 
-            print "Adding " + layer['input_fc_name']
+        input_layer = os.path.basename('%s_layer') % input_fc
 
-            # define transformation
-            if layer['transformation']:
-                arcpy.env.geographicTransformations = layer['transformation']
+        arcpy.MakeFeatureLayer_management(input_fc,
+                                          input_layer,
+                                          layer['where_clause'],
+                                          "",
+                                          "")
 
-            # create feature layer from feature class
-            input_fc = os.path.join(os.path.join(layer['input_ws'], layer['input_ds'], layer['input_fc_name']))
-            input_layer = os.path.basename('%s_layer') % input_fc
+        # map fields
+        fms = arcpy.FieldMappings()
 
-            arcpy.MakeFeatureLayer_management(input_fc,
-                                              input_layer,
-                                              layer['where_clause'],
-                                              "",
-                                              "")
+        for field in layer['fields']:
+            if layer['fields'][field]:
+                if layer['fields'][field][0] == 'field':
+                    fms.addFieldMap(create_field_map(input_layer, layer, field))
 
-            # map fields
-            fms = arcpy.FieldMappings()
+        # append layer to target feature class
+        arcpy.Append_management(input_layer,
+                                target_fc,
+                                "NO_TEST",
+                                fms,
+                                "")
 
-            for field in layer['fields']:
-                if layer['fields'][field]:
-                    if layer['fields'][field][0] == 'field':
-                         fms.addFieldMap(create_field_map(input_layer, layer, field))
+        # Update field values, for un-mapped fields
 
-            # append layer to target feature class
-            arcpy.Append_management(input_layer,
-                                    target_fc,
-                                    "NO_TEST",
-                                    fms,
-                                    "")
+        arcpy.MakeFeatureLayer_management(target_fc,
+                                          target_layer,
+                                          "country IS NULL OR country = '%s'" % layer['fields']['country'][1],
+                                          "",
+                                          "")
+        for field in layer['fields']:
+            if layer['fields'][field]:
 
-            # Update field values, for un-mapped fields
-            for field in layer['fields']:
-                if layer['fields'][field]:
-                    if layer['fields'][field][0] == 'value':
-                        arcpy.MakeFeatureLayer_management(target_fc,
-                                                          target_layer,
-                                                          "country IS NULL OR country = '%s'" % layer['fields']['country'][1],
-                                                          "",
-                                                          "")
-                        arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
+                if layer['fields'][field][0] == 'value':
+                    arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
 
-            # reset transformation
-            arcpy.env.geographicTransformations = ""
+                elif layer['fields'][field][0] == 'expression':
+                    arcpy.CalculateField_management(target_layer, field, "%s" % layer['fields'][field][1], "PYTHON", "")
 
-        except:
-            print "Failed to add " + layer['input_fc_name']
-            traceback.print_exc()
+        #convert empty strings ('') to NULL
+        empty_strings2null(input_fc)
+
+        # reset transformation
+        arcpy.env.geographicTransformations = ""
+
+        #except:
+        #   print "Failed to add " + layer['input_fc_name']
+        #  traceback.print_exc()
 
 
     # Export FeatureClass to Shapefile
@@ -155,6 +196,4 @@ def merge(mlayer):
     for i in r:
         os.remove(i)
 
-if __name__ == '__main__':
 
-    print merge(sys.argv[1])
