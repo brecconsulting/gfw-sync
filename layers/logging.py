@@ -12,6 +12,27 @@ def layers():
     #Follow the same schema to add new layers
     #Don't forget to add layer in return list at the end of the function
 
+
+    lbr_concessions = {
+        'location': "S3",
+        'full_path': "gfw2-data//logging//lbr//Liberia_logging_merge.shp",
+        'where_clause': "\"STATUS\" <> 'Cancelled'", #make sure to escape quotes (\")
+        'transformation': None,
+        'fields': {
+            'country': ["value", "LBR"],
+            'year': ["value", "2014"],
+            'type': ["field", "PERMIT_NUM"],
+            'name': ["field", "NAME"],
+            'company': ["field", "COMPANY"],
+            'group_company': ["field", "GROUP_"],
+            'group_country': ["field", "NAT_ORIGIN"],
+            'province': None,
+            'status': ["field", "STATUS"],
+            'area_ha': ["field", "AREA_HA"],
+            'source': ["value", "Global Witness 2014"]
+        }
+    }    
+
     cmr_fmu = {
         'location': "Server",
         'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_ufa_2013",
@@ -95,4 +116,4 @@ def layers():
 
 
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, lbr_concessions]
