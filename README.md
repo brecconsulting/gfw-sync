@@ -41,13 +41,10 @@ Layers() function must return a list with layers.
 Layers are Python dictionaries with the following keys:
 
 1. Location
-2. Bucket (optional)
-3. Input Workspace
-4. Input Dataset (optional)
-5. Input Feature Class
-6. Where clause (optional)
-7. Transformation (optional)
-8. Fields
+2. Full Path to file or feature class
+3. Where clause
+4. Transformation
+5. Fields
 
 Fields is also a python dictionary, keys correspond to field names in target feature class; values can contain field names, fixed values or expressions
 There must be at least a field called "country" for any target dataset
@@ -60,11 +57,8 @@ Logging layers must follow the following schema
 ```python
     layer_name = {
         'location: "" # Either "S3" or "Server"
-        'bucket': "" # S3 bucket name, you can skip this key for any other location
-        'input_ws': "",  # Absolute path to Folder or GDB. Backslashes must be escaped by another backslash (\\), don't put in the S3 bucket name, just the folders starting with "//"
-        'input_ds': "",  # Name of Feature Dataset, leave empty quotes ("") if no Feature Dataset is used
-        'input_fc_name': "",  # Name of Feature Class or Shapefile
-        'where_clause': "",  # Filter statement (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
+        'full_path': "" # Full path to file or feature class. For server including Drive name, for s3 including bucket name. For geodatabases including feature dataset name
+        'where_clause': "",  # Definition query (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
         'transformation': "",  # ArcGIS transformation. Leave empty quotes ("") or type None (without quotes) if no transformation is needed
         'fields': {
 
@@ -72,6 +66,7 @@ Logging layers must follow the following schema
             # if corresponding field exists type ["field", "fieldname"], fieldname is case sensitive!
             # if you want to add a fixed value for all fields type ["value", "some text"]
             # if you want to add an expression based type ["expression", "some expression"], expression must correspond to Python expression in "Calculate Field" Tool
+            # Example: ["expression", "!SHAPE_Area!/10000"]
             # if you want to leave the field blank type None (without quotes and squared brackets)
 
             'country': [],  # should always be["value", "3 letter ISO-Code"],
