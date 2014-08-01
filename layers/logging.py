@@ -14,9 +14,7 @@ def layers():
 
     cmr_fmu = {
         'location': "Server",
-        'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb",
-        'input_ds': "Forest_management",
-        'input_fc_name': "CMR_ufa_2013",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_ufa_2013",
         'where_clause': "",
         'transformation': None,
         'fields': {
@@ -36,9 +34,7 @@ def layers():
 
     cmr_fc = {
         'location': "Server",
-        'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb",
-        'input_ds': "Forest_management",
-        'input_fc_name': "CMR_FC_2013",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_FC_2013",
         'where_clause': "",
         'transformation': None,
         'fields': {
@@ -58,9 +54,7 @@ def layers():
 
     gab_cfad = {
         'location': "Server",
-        'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb",
-        'input_ds': "amenagement_forestier",
-        'input_fc_name': "gab_CFAD",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb\\amenagement_forestier\\gab_CFAD",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -80,9 +74,7 @@ def layers():
 
     gab_cpaet= {
         'location': "Server",
-        'input_ws': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb",
-        'input_ds': "amenagement_forestier",
-        'input_fc_name': "gab_CPAET",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb\\amenagement_forestier\\gab_CPAET",
         'where_clause': "",
         'transformation': "",
         'fields': {

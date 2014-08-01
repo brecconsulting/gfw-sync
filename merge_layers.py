@@ -14,6 +14,7 @@ import archiver
 import glob
 import sys
 import traceback
+import string
 
 from config import settings
 
@@ -48,6 +49,13 @@ def empty_strings2null(fclass):
                                               "")
             arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
 
+def get_bucket_name(s3_path):
+    if len(string.split(s3_path,'\\'))>1:
+        return string.split(s3_path,'\\')[0]
+    elif len(string.split(s3_path,'//'))>1:
+        return string.split(s3_path,'//')[0]
+    else:
+        return None
 
 def merge(mlayer):
     # import layer file given in system argument
@@ -115,7 +123,7 @@ def merge(mlayer):
         #         except KeyError:
         #             pass
 
-        print "Adding " + layer['input_fc_name']
+        print "Adding " + os.path.basename(layer['full_path'])
 
         # define transformation
         if layer['transformation']:
@@ -124,10 +132,13 @@ def merge(mlayer):
         # create feature layer from feature class
 
         if layer['location'].lower() == 'server':
-            input_fc = os.path.join(layer['input_ws'], layer['input_ds'], layer['input_fc_name'])
-        elif layer['location'] == 's3':
-            input_fc = os.path.join(layer['bucket'][bucket_drives], layer['input_ws'], layer['input_ds'],
-                                    layer['input_fc_name'])
+            input_fc = layer['full_path']
+        elif layer['location'].lower() == 's3':
+
+            s3_bucket_drive = bucket_drives[get_bucket_name(layer['full_path'])]
+            s3_path = layer['full_path'][len(get_bucket_name(layer['full_path'])):]
+
+            input_fc = os.path.join(s3_bucket_drive, s3_path)
 
         input_layer = os.path.basename('%s_layer') % input_fc
 
