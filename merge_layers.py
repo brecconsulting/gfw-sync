@@ -52,8 +52,8 @@ def empty_strings2null(fclass):
 def get_bucket_name(s3_path):
     if len(string.split(s3_path,'\\'))>1:
         return string.split(s3_path,'\\')[0]
-    elif len(string.split(s3_path,'//'))>1:
-        return string.split(s3_path,'//')[0]
+    elif len(string.split(s3_path,'/'))>1:
+        return string.split(s3_path,'/')[0]
     else:
         return None
 

@@ -14,8 +14,10 @@ def layers():
 
 
     lbr_concessions = {
-        'location': "S3",
-        'full_path': "gfw2-data//logging//lbr//Liberia_logging_merge.shp",
+        #'location': "S3",
+        #'full_path': "gfw2-data/logging/lbr/Liberia_logging_merge.shp",
+        'location': "Server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\lbr\\Liberia_logging_merge.shp",
         'where_clause': "\"STATUS\" <> 'Cancelled'", #make sure to escape quotes (\")
         'transformation': None,
         'fields': {
