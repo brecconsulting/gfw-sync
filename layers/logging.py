@@ -15,7 +15,7 @@ def layers():
 
     LBR_Logging = {
         'location': "S3",
-        'full_path': "gfw2-data//forestuse//logging//lbr//LBR_Logging.shp",
+        'full_path': "gfw2-data/forestuse/logging/lbr/LBR_Logging.shp",
         'where_clause': "\"Status\" <> 'CANCELLED'", #make sure to escape quotes (\")
         'transformation': None,
         'fields': {
