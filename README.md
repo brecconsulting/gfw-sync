@@ -3,18 +3,21 @@ gfw-sync
 
 Synchronization stuff for easier management of GFW data
 
-### merge_layers.py
-
-This python script merges features from different feature classes into one feature class and exports it as shape file.
-In- and output features are defined in separate layer files, found in layers folder
-It calls archiver.py and uploads shapefile to S3.
-
 
 #### Usage
 
+To update all layers call
+
 Command line
 ```shell
-python merge_layers.py logging
+python gfw_sync.py
+```
+
+To update specific layers call
+
+Command line
+```shell
+python gfw_sync.py logging mining
 ```
 
 
@@ -26,55 +29,45 @@ Python:
 
 
 
-### layers/any_name.py
+### Configuration
 
 Layer files live in the layer folder and must have suffix .py
 You can add as many layer files as you want.
 
-All layer files must have two functions "target()" and "layers()"
-Target() function must return a list with four values
-
-1. Target Workspace
-2. Target Feature Class
-3. Scratch Folder
-4. S3 Bucket
+All layer files must contain function "layers()"
 
 Layers() function must return a list with layers.
-Layers are dictonaries with
 
-1. Input Workspace
-2. Input Dataset
-3. Input Feature Class
-4. Where clause
-5. Transformation
-6. Fields
+Layers are Python dictionaries with the following keys:
 
-Where Fields is a Dictionary with target fieldnames and their input field names or values
+1. Location
+2. Full Path to file or feature class
+3. Where clause
+4. Transformation
+5. Fields
+
+Fields is also a python dictionary, keys correspond to field names in target feature class; values can contain field names, fixed values or expressions
 There must be at least a field called "country" for any target dataset
 
 
-#### Logging
+#### Example
 
 Logging layers must follow the following schema
 
 ```python
     layer_name = {
-        'input_ws': "",  # Absolute path to Folder or GDB. Backslashes must be escaped by another backslash (\\)
-        'input_ds': "",  # Name of Feature Dataset, leave empty quotes ("") if no Feature Dataset is used
-        'input_fc_name': "",  # Name of Feature Class or Shapefile
-        'where_clause': "",  # Filter statement (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
+        'location: "" # Either "S3" or "Server"
+        'full_path': "" # Full path to file or feature class. For server including Drive name, for s3 including bucket name. For geodatabases including feature dataset name
+        'where_clause': "",  # Definition query (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
         'transformation': "",  # ArcGIS transformation. Leave empty quotes ("") or type None (without quotes) if no transformation is needed
-        'update': {
-            # optional, can be either:
-            'replication': ['gdb1','replication_name', 'gdb2', 'output_projection (optional)', 'transformation (optional)"], # optional
-            'routine': 'custom_module' # optional
-            }
         'fields': {
 
             # for all fields:
             # if corresponding field exists type ["field", "fieldname"], fieldname is case sensitive!
             # if you want to add a fixed value for all fields type ["value", "some text"]
-            # id you want to leave the field blank type None (without quotes and squared brackets)
+            # if you want to add an expression based type ["expression", "some expression"], expression must correspond to Python expression in "Calculate Field" Tool
+            # Example: ["expression", "!SHAPE_Area!/10000"]
+            # if you want to leave the field blank type None (without quotes and squared brackets)
 
             'country': [],  # should always be["value", "3 letter ISO-Code"],
             'year': [],  #  should always be ["value", now.year]
@@ -87,13 +80,13 @@ Logging layers must follow the following schema
             'status': [],
             'area_ha': [],
             'source': [],
-            'shape_length': [],  # optional
-            'shape_area': []  # optional
+            'shape_length': [],  # optional, can be left out
+            'shape_area': []  # optional, can be left out
         }
     }
 ```
 
-afterwards add input file to country list
+afterwards add input file to country list at the end of file
 
 ```python
 countries = [layer_name_1, layer_name_2, ...]

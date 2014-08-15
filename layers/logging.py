@@ -2,13 +2,7 @@
 
 import datetime
 
-def target():
-    target_ws = "D:\\GIS Data\\GFW\\GFW_data_wm.gdb"
-    target_fc_name = "logging"
-    scratch_folder = "D:\\GIS Data\\GFW\\temp"
-    s3_bucket = "gfw2_download"
 
-    return [target_ws, target_fc_name, scratch_folder, s3_bucket]
 
 def layers():
 
@@ -18,35 +12,52 @@ def layers():
     #Follow the same schema to add new layers
     #Don't forget to add layer in return list at the end of the function
 
+
+    lbr_concessions = {
+        #'location': "S3",
+        #'full_path': "gfw2-data/logging/lbr/Liberia_logging_merge.shp",
+        'location': "Server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\lbr\\Liberia_logging_merge.shp",
+        'where_clause': "\"STATUS\" <> 'Cancelled'", #make sure to escape quotes (\")
+        'transformation': None,
+        'fields': {
+            'country': ["value", "LBR"],
+            'year': ["value", "2014"],
+            'type': ["field", "PERMIT_NUM"],
+            'name': ["field", "NAME"],
+            'company': ["field", "COMPANY"],
+            'group_company': ["field", "GROUP_"],
+            'group_country': ["field", "NAT_ORIGIN"],
+            'province': None,
+            'status': ["field", "STATUS"],
+            'area_ha': ["field", "AREA_HA"],
+            'source': ["value", "Global Witness 2014"]
+        }
+    }    
+
     cmr_fmu = {
-        'input_ws': "D:\\GIS Data\\CMR\\CMR_data_wm.gdb",
-        'input_ds': "",
-        'input_fc_name': "CMR_ufa",
+        'location': "Server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_ufa_2013",
         'where_clause': "",
         'transformation': None,
-        'public_url': 'http://candan.org/download',
-        'create_zip': yes,
         'fields': {
             'country': ["value", "CMR"],
             'year': ["value", now.year],
             'type': ["value", "FMU"],
-            'name': ["field", "NAME"],
+            'name': ["field", "TOPONYME"],
             'company': ["field", "ATTRIBUTAI"],
             'group_company': ["field", "GROUPE_PAR"],
             'group_country': None,
             'province': ["field", "PROVINCE"],
-            'status': ["field", "STATUS"],
+            'status': ["field", "STATUT"],
             'area_ha': ["field", "SUP_SIG"],
-            'source': ["value", "MINFOF"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
+            'source': ["value", "MINFOF 2013"],
         }
     }
 
     cmr_fc = {
-        'input_ws': "D:\\GIS Data\\CMR\\CMR_data_wm.gdb",
-        'input_ds': "",
-        'input_fc_name': "CMR_FC",
+        'location': "Server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_FC_2013",
         'where_clause': "",
         'transformation': None,
         'fields': {
@@ -60,16 +71,13 @@ def layers():
             'province': None,
             'status': ["field", "STATUT"],
             'area_ha': ["field", "SUP_SIG"],
-            'source': ["value", "MINFOF"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
+            'source': ["value", "MINFOF 2013"],
         }
     }
 
     gab_cfad = {
-        'input_ws': "D:\\GIS Data\\GAB\\GAB_data_wm.gdb",
-        'input_ds': "amenagement_forestier",
-        'input_fc_name': "gab_CFAD",
+        'location': "Server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb\\amenagement_forestier\\gab_CFAD",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -84,15 +92,12 @@ def layers():
             'status': None,
             'area_ha': ["field", "sup_sig"],
             'source': ["value", "MINEF"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
         }
     }
 
     gab_cpaet= {
-        'input_ws': "D:\\GIS Data\\GAB\\GAB_data_wm.gdb",
-        'input_ds': "amenagement_forestier",
-        'input_fc_name': "gab_CPAET",
+        'location': "Server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb\\amenagement_forestier\\gab_CPAET",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -107,12 +112,10 @@ def layers():
             'status': None,
             'area_ha': ["field", "sup_sig"],
             'source': ["value", "MINEF"],
-            'shape_length': ["field", "Shape_Length"],
-            'shape_area': ["field", "Shape_Area"]
         }
     }
 
 
 
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, lbr_concessions]
