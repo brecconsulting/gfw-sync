@@ -17,7 +17,7 @@ def layers():
         'location': "S3",
         'full_path': "gfw2-data/forestuse/logging/lbr/LBR_Logging.shp",
         'where_clause': "\"Status\" <> 'CANCELLED'", #make sure to escape quotes (\")
-        'transformation': "NAD_1927_To_WGS_1984_33",
+        'transformation': None,
         'fields': {
             'country': ["value", "LBR"],
             'year': ["value", "2014"],
@@ -37,7 +37,7 @@ def layers():
         'location': "S3",
         'full_path': "gfw2-data/forestuse/logging/can/canada_forest_tenures_2013_final.shp",
         'where_clause': None, #make sure to escape quotes (\")
-        'transformation': None,
+        'transformation': "NAD_1927_To_WGS_1984_33",
         'fields': {
             'country': ["value", "CAN"],
             'year': ["value", "2014"],
