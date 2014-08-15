@@ -13,10 +13,10 @@ def layers():
     #Don't forget to add layer in return list at the end of the function
 
 
-    lbr_concessions = {
+    LBR_Logging = {
         'location': "S3",
-        'full_path': "gfw2-data//logging//lbr//Liberia_logging_merge.shp",
-        'where_clause': "\"STATUS\" <> 'Cancelled'", #make sure to escape quotes (\")
+        'full_path': "gfw2-data//forestuse//logging//lbr//LBR_Logging.shp",
+        'where_clause': "\"Status\" <> 'CANCELLED'", #make sure to escape quotes (\")
         'transformation': None,
         'fields': {
             'country': ["value", "LBR"],
@@ -27,7 +27,7 @@ def layers():
             'group_company': ["field", "GROUP_"],
             'group_country': ["field", "NAT_ORIGIN"],
             'province': None,
-            'status': ["field", "STATUS"],
+            'status': ["field", "Status"],
             'area_ha': ["field", "AREA_HA"],
             'source': ["value", "Global Witness 2014"]
         }
@@ -116,4 +116,4 @@ def layers():
 
 
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, lbr_concessions]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging]
