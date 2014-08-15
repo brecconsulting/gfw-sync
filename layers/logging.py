@@ -31,8 +31,29 @@ def layers():
             'area_ha': ["field", "AREA_HA"],
             'source': ["value", "Global Witness 2014"]
         }
-    }    
+    }
+  
+    canada_forest_tenures_2013_final = {
+        'location': "S3",
+        'full_path': "gfw2-data/forestuse/logging/can/canada_forest_tenures_2013_final.shp",
+        'where_clause': None, #make sure to escape quotes (\")
+        'transformation': None,
+        'fields': {
+            'country': ["value", "CAN"],
+            'year': ["value", "2014"],
+            'type': ["field", "TYPE"],
+            'name': ["field", "NAME"],
+            'company': ["field", "COMPANY"],
+            'group_company': None,
+            'group_country': None,
+            'province': ["field", "PROVINCE"],
+            'status': None,
+            'area_ha': None,
+            'source': ["value", "Global Forest Watch Canada"]
 
+        }
+    }
+  
     cmr_fmu = {
         'location': "Server",
         'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_ufa_2013",
@@ -116,4 +137,4 @@ def layers():
 
 
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final]
