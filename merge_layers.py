@@ -15,6 +15,7 @@ import glob
 import sys
 import traceback
 import string
+import urllib
 
 from config import settings
 
@@ -57,6 +58,14 @@ def get_bucket_name(s3_path):
     else:
         return None
 
+
+def get_json_name(json_url):
+
+    url_list = json_url.split("/")
+    json = url_list[len(url_list)-1].split("?")
+    json_name = json[0]
+    return json_name
+
 def merge(mlayer):
     # import layer file given in system argument
     global input_fc
@@ -70,6 +79,7 @@ def merge(mlayer):
     target_ws = settings.get_target_gdb()
     target_fc_name = mlayer
     scratch_folder = settings.get_scratch_folder()
+    scratch_gdb =  settings.get_scratch_gdb()
     s3_bucket = settings.get_download_bucket()
     bucket_drives = settings.get_bucket_drive()
 
@@ -92,37 +102,6 @@ def merge(mlayer):
     #Add features, one layer at a time
     for layer in layers:
 
-        #try:
-
-        # # update source dataset
-        #     try:
-        #         if layer['update']['replication']:
-        #             #print "update source file" + layer['input_fc_name']
-        #             gdb1 = layer['update']['replication'][0]
-        #             replica = layer['update']['replication'][1]
-        #             gdb2 = layer['update']['replication'][2]
-        #
-        #             default_trans = arcpy.env.geographicTransformations
-        #             defautl_outCoorSys = arcpy.env.outputCoordinateSystem
-        #             if len(layer['update']['replication']) >= 3:
-        #                 arcpy.env.geographicTransformations = layer['update']['replication'][3]
-        #             if len(layer['update']['replication']) >= 4:
-        #                 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(layer['update']['replication'][4])
-        #
-        #             arcpy.SynchronizeChanges_management(gdb1, replica, gdb2, "FROM_GEODATABASE1_TO_2", "IN_FAVOR_OF_GDB1", "BY_OBJECT", "DO_NOT_RECONCILE")
-        #
-        #             arcpy.env.geographicTransformations = default_trans
-        #             arcpy.env.outputCoordinateSystem = defautl_outCoorSys
-        #
-        #     except KeyError:
-        #         try:
-        #             if layer['update']['routine']:
-        #                 cmod = import_module('layers.' + layer['update']['routine'])
-        #                 print cmod.execute()
-        #
-        #         except KeyError:
-        #             pass
-
         print "Adding " + os.path.basename(layer['full_path'])
 
         # define transformation
@@ -139,6 +118,16 @@ def merge(mlayer):
             s3_path = layer['full_path'][len(get_bucket_name(layer['full_path'])):]
 
             input_fc = os.path.join(s3_bucket_drive, s3_path)
+
+        elif layer['location'].lower() == 'gfw-opendata':
+
+            json_name = get_json_name(layer['full_path'])
+            json = os.path.join(scratch_folder, json_name)
+            urllib.urlretrieve(layer['full_path'], os.path.join(scratch_folder, json_name))
+            input_fc = os.path.join(scratch_gdb, json_name[:-8])
+            arcpy.JSONToFeatures_conversion(json, input_fc)
+
+
 
         input_layer = os.path.basename('%s_layer') % input_fc
 

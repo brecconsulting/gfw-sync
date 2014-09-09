@@ -32,3 +32,6 @@ def get_download_bucket():
     download_bucket = "gfw2_download"
     return download_bucket
 
+def get_scratch_gdb():
+    scratch_gdb = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\temp\\temp.gdb"
+    return scratch_gdb

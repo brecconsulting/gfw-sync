@@ -56,8 +56,8 @@ def layers():
     }
   
     cmr_fmu = {
-        'location': "Server",
-        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_ufa_2013",
+        'location': "gfw-opendata",
+        'full_path': "http://cmr.wri-temp.opendata.arcgis.com/datasets/a81990f68048463b9e62311de5596a3f_7.geojson",
         'where_clause': "",
         'transformation': None,
         'fields': {
