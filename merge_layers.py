@@ -124,7 +124,7 @@ def merge(mlayer):
 
             input_fc = os.path.join(s3_bucket_drive, s3_path)
 
-        elif layer['location'].lower() == 'gfw-opendata':
+        elif layer['location'].lower() == 'geojson_url':
 
             json_name = get_json_name(layer['full_path'])
             json = os.path.join(scratch_folder, json_name)

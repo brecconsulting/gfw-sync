@@ -15,8 +15,8 @@ def layers():
 
 
     LBR_Logging = {
-        'location': "S3",
-        'full_path': "gfw2-data/forestuse/logging/lbr/LBR_Logging.shp",
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/5c3ce80d80df4d7f9f6a39a19f15b90d_0.geojson",
         'where_clause': "\"Status\" <> 'CANCELLED'", #make sure to escape quotes (\")
         'transformation': None,
         'fields': {
@@ -35,10 +35,10 @@ def layers():
     }
   
     canada_forest_tenures_2013_final = {
-        'location': "S3",
-        'full_path': "gfw2-data/forestuse/logging/can/canada_forest_tenures_2013_final.shp",
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/8a622cadef8947519f7b909e22cd7daf_0.geojson",
         'where_clause': None, #make sure to escape quotes (\")
-        'transformation': "NAD_1927_To_WGS_1984_33",
+        'transformation': None,
         'fields': {
             'country': ["value", "CAN"],
             'year': ["value", "2014"],
@@ -51,13 +51,12 @@ def layers():
             'status': None,
             'area_ha': None,
             'source': ["value", "Global Forest Watch Canada"]
-
+            }
         }
-    }
   
     cmr_fmu = {
-        'location': "gfw-opendata",
-        'full_path': "http://cmr.wri-temp.opendata.arcgis.com/datasets/a81990f68048463b9e62311de5596a3f_7.geojson",
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/832f104b888c40c88491ce405d1cd896_7.geojson",
         'where_clause': "",
         'transformation': None,
         'fields': {
@@ -72,32 +71,32 @@ def layers():
             'status': ["field", "STATUS"],
             'area_ha': ["field", "SUP_SIG"],
             'source': ["value", "MINFOF 2013"],
+            }
         }
-    }
 
     cmr_fc = {
-        'location': "Server",
-        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\CMR\\CMR_data.gdb\\Forest_management\\CMR_FC_2013",
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/416a39b7eb344abea60fab4b79a03e51_9.geojson",
         'where_clause': "",
         'transformation': None,
         'fields': {
             'country': ["value", "CMR"],
             'year': ["value", now.year],
             'type': ["value", "Council Forest"],
-            'name': ["field", "TOPONYME"],
+            'name': ["field", "NAME"],
             'company': None,
             'group_company': None,
             'group_country': None,
             'province': None,
-            'status': ["field", "STATUT"],
+            'status': ["field", "CLASSE"],
             'area_ha': ["field", "SUP_SIG"],
             'source': ["value", "MINFOF 2013"],
+            }
         }
-    }
 
     gab_cfad = {
-        'location': "Server",
-        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb\\amenagement_forestier\\gab_CFAD",
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/bc4b1dcc97a44c849de947365087dc64_14.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -116,8 +115,8 @@ def layers():
     }
 
     gab_cpaet= {
-        'location': "Server",
-        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GAB\\GAB_data.gdb\\amenagement_forestier\\gab_CPAET",
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/d9caac62192249c99d0dfa836cdb0664_15.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -135,7 +134,84 @@ def layers():
         }
     }
 
+    CAR_Logging= {
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/d3587de764f941d89484507b0595e872_7.geojson",
+        'where_clause': "",
+        'transformation': "",
+        'fields': {
+            'country': ["value", "CAF"],
+            'year': ["value", now.year],
+            'type': ["value", "Logging Concession"],
+            'name': ["field", "Permit_number"],
+            'company': ["field", "PEA_NOM"],
+            'group_company': None,
+            'group_country': ["field", "orig_cap_e"],
+            'province': None,
+            'status': ["field", "Situation_"],
+            'area_ha': ["field", "Surface_Ha"],
+            'source': ["value", "MEFCP 2013"],
+        }
+    }
 
+    DRC_FC= {
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/2d56b275452f4eef94088dee3451153e_3.geojson",
+        'where_clause': "",
+        'transformation': "",
+        'fields': {
+            'country': ["value", "DRC"],
+            'year': ["value", now.year],
+            'type': ["value", "Logging Concession"],
+            'name': ["field", "num_ga"],
+            'company': ["field", "nom_ste_a"],
+            'group_company': None,
+            'group_country': ["field", "orig_cap"],
+            'province': None,
+            'status': ["field", "statut_tf"],
+            'area_ha': ["field", "sup_sig"],
+            'source': ["value", "MECAT 2013"],
+        }
+    }
 
+    GNQ_NF= {
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/dc2f57573ae14a6f934872785fecc1b2_5.geojson",
+        'where_clause': "",
+        'transformation': "",
+        'fields': {
+            'country': ["value", "GNQ"],
+            'year': ["value", now.year],
+            'type': ["value", "National Forest"],
+            'name': ["field", "Localizaci"],
+            'company': ["field", "Empr_explt"],
+            'group_company': ["field", "Empresa"],
+            'group_country': ["field", "Procd_empr"],
+            'province': None,
+            'status': ["field", "Estado"],
+            'area_ha': ["field", "sup_sig_ha"],
+            'source': ["value", "MAF 2013"],
+        }
+    }
+
+    COG_LC= {
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/f55797d780444c64a7121fe1f8296206_5.geojson",
+        'where_clause': "",
+        'transformation': "",
+        'fields': {
+            'country': ["value", "COG"],
+            'year': ["value", now.year],
+            'type': ["value", "Logging Concessions"],
+            'name': ["field", "Nom_Code_C"],
+            'company': ["field", "Ste_att_en"],
+            'group_company': None,
+            'group_country': ["field", "Origine_ca"],
+            'province': None,
+            'status': ["field", "SIT_ENG"],
+            'area_ha': ["field", "Hectares"],
+            'source': ["value", "MEFDD 2013"],
+        }
+    }
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, CAR_Logging, DRC_FC, GNQ_NF, COG_LC]
