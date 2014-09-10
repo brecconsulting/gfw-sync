@@ -19,6 +19,8 @@ import urllib
 
 from config import settings
 
+arcpy.ImportToolbox(get_geojson_toolbox())
+
 
 def import_module(name):
     mod = __import__(name)
@@ -65,6 +67,9 @@ def get_json_name(json_url):
     json = url_list[len(url_list)-1].split("?")
     json_name = json[0]
     return json_name
+
+
+
 
 def merge(mlayer):
     # import layer file given in system argument
@@ -123,9 +128,11 @@ def merge(mlayer):
 
             json_name = get_json_name(layer['full_path'])
             json = os.path.join(scratch_folder, json_name)
-            urllib.urlretrieve(layer['full_path'], os.path.join(scratch_folder, json_name))
+            #urllib.urlretrieve(layer['full_path'], os.path.join(scratch_folder, json_name))
             input_fc = os.path.join(scratch_gdb, json_name[:-8])
-            arcpy.JSONToFeatures_conversion(json, input_fc)
+            arcpy.ImportGeoJSONFromURL_geojsonconversion(layer['full_path'], input_fc)
+            #geojson_to_features(json,input_fc)
+            #arcpy.JSONToFeatures_conversion(json, input_fc)
 
 
 

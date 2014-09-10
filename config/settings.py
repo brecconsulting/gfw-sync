@@ -35,3 +35,7 @@ def get_download_bucket():
 def get_scratch_gdb():
     scratch_gdb = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\temp\\temp.gdb"
     return scratch_gdb
+
+def get_geojson_toolbox():
+    toolbox = "C:\\Users\\Thomas.Maschler\\Documents\\GitHub\\geojson-madness\\GeoJSONUtilities.pyt"
+    return toolbox
