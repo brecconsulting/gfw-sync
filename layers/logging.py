@@ -134,9 +134,9 @@ def layers():
         }
     }
 
-    CAR_Logging= {
+    CAR_Logging = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/d3587de764f941d89484507b0595e872_7.geojson",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/a5e9ec108ba2446289352272aa58f7a9_7.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -214,4 +214,4 @@ def layers():
         }
     }
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, DRC_FC, GNQ_NF, COG_LC]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, DRC_FC, GNQ_NF, COG_LC, CAR_Logging]
