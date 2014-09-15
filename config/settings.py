@@ -8,7 +8,7 @@ def get_bucket_drive():
 
 
 def get_target_gdb():
-    target_gdb = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\GFW_data_wm.gdb"
+    target_gdb = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\Global_Layers.gdb"
     return target_gdb
 
 
