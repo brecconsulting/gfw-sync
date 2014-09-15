@@ -114,7 +114,7 @@ def layers():
         }
     }
 
-    gab_cpaet= {
+    gab_cpaet = {
         'location': "geojson_url",
         'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/d9caac62192249c99d0dfa836cdb0664_15.geojson",
         'where_clause': "",
@@ -154,7 +154,7 @@ def layers():
         }
     }
 
-    DRC_FC= {
+    DRC_FC = {
         'location': "geojson_url",
         'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/2d56b275452f4eef94088dee3451153e_3.geojson",
         'where_clause': "",
@@ -174,7 +174,7 @@ def layers():
         }
     }
 
-    GNQ_NF= {
+    GNQ_NF = {
         'location': "geojson_url",
         'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/dc2f57573ae14a6f934872785fecc1b2_5.geojson",
         'where_clause': "",
@@ -194,7 +194,7 @@ def layers():
         }
     }
 
-    COG_LC= {
+    COG_LC = {
         'location': "geojson_url",
         'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/f55797d780444c64a7121fe1f8296206_5.geojson",
         'where_clause': "",
@@ -214,7 +214,7 @@ def layers():
         }
     }
 
-    IND_LC= {
+    IND_LC = {
         'location': "geojson_url",
         'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/7625d42497034fa5b80a93d90525abfe_0.geojson",
         'where_clause': "",
