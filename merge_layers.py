@@ -19,7 +19,7 @@ import urllib
 
 from config import settings
 
-arcpy.ImportToolbox(get_geojson_toolbox())
+arcpy.ImportToolbox(settings.get_geojson_toolbox())
 
 
 def import_module(name):
@@ -129,7 +129,7 @@ def merge(mlayer):
             json_name = get_json_name(layer['full_path'])
             json = os.path.join(scratch_folder, json_name)
             #urllib.urlretrieve(layer['full_path'], os.path.join(scratch_folder, json_name))
-            input_fc = os.path.join(scratch_gdb, json_name[:-8])
+            input_fc = os.path.join(scratch_gdb, "geojson_" + json_name[:-8])
             arcpy.ImportGeoJSONFromURL_geojsonconversion(layer['full_path'], input_fc)
             #geojson_to_features(json,input_fc)
             #arcpy.JSONToFeatures_conversion(json, input_fc)

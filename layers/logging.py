@@ -35,10 +35,10 @@ def layers():
     }
   
     canada_forest_tenures_2013_final = {
-        'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/8a622cadef8947519f7b909e22cd7daf_0.geojson",
+        'location': "server",
+        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Canada_forest_tenures_2013\\canada_forest_tenures_2013_final.shp",
         'where_clause': None, #make sure to escape quotes (\")
-        'transformation': None,
+        'transformation': "NAD_1927_To_WGS_1984_33",
         'fields': {
             'country': ["value", "CAN"],
             'year': ["value", "2014"],
@@ -134,9 +134,9 @@ def layers():
         }
     }
 
-    CAR_Logging= {
+    CAR_Logging = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/d3587de764f941d89484507b0595e872_7.geojson",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/a5e9ec108ba2446289352272aa58f7a9_7.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -235,4 +235,4 @@ def layers():
     }
 
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, CAR_Logging, DRC_FC, GNQ_NF, COG_LC, IND_LC]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, DRC_FC, GNQ_NF, COG_LC, CAR_Logging, IND_LC]
