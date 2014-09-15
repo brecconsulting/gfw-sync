@@ -213,5 +213,26 @@ def layers():
             'source': ["value", "MEFDD 2013"],
         }
     }
+
+    IND_LC= {
+        'location': "geojson_url",
+        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/7625d42497034fa5b80a93d90525abfe_0.geojson",
+        'where_clause': "",
+        'transformation': "",
+        'fields': {
+            'country': ["value", "IND"],
+            'year': ["value", now.year],
+            'type': ["value", "Logging Concessions"],
+            'name': ["field", "Name"],
+            'company': ["field", "COMPANY"],
+            'group_company': None,
+            'group_country': ["field", "NAT_ORIGIN"],
+            'province': ["field", "PROVINCE"],
+            'status': ["field", "Status"],
+            'area_ha': ["field", "AREA_HA"],
+            'source': ["value", "varies"],
+        }
+    }
+
     #return layer list
-    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, CAR_Logging, DRC_FC, GNQ_NF, COG_LC]
+    return [cmr_fmu, cmr_fc, gab_cfad, gab_cpaet, LBR_Logging, canada_forest_tenures_2013_final, CAR_Logging, DRC_FC, GNQ_NF, COG_LC, IND_LC]
