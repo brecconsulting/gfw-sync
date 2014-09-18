@@ -36,7 +36,7 @@ def layers():
   
     canada_forest_tenures_2013_final = {
         'location': "server",
-        'full_path': "C:\\Users\\Thomas.Maschler\\Documents\\Canada_forest_tenures_2013\\canada_forest_tenures_2013_final.shp",
+        'full_path': "D:\\GIS Data\\CAN\\canada_forest_tenures_2013_final.shp",
         'where_clause': None, #make sure to escape quotes (\")
         'transformation': "NAD_1927_To_WGS_1984_33",
         'fields': {

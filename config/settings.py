@@ -8,7 +8,7 @@ def get_bucket_drive():
 
 
 def get_target_gdb():
-    target_gdb = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\Global_Layers.gdb"
+    target_gdb = "D:\\GIS Data\\GFW\\GFW_data_wm.gdb"
     return target_gdb
 
 
@@ -24,7 +24,7 @@ def get_target_feature_classes():
 
 
 def get_scratch_folder():
-    scratch_folder = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\temp"
+    scratch_folder = "D:\\GIS Data\\GFW\\temp"
     return scratch_folder
 
 
@@ -33,9 +33,9 @@ def get_download_bucket():
     return download_bucket
 
 def get_scratch_gdb():
-    scratch_gdb = "C:\\Users\\Thomas.Maschler\\Documents\\Atlas\\test\\GFW\\temp\\temp.gdb"
+    scratch_gdb = "D:\\GIS Data\\GFW\\temp\\temp.gdb"
     return scratch_gdb
 
 def get_geojson_toolbox():
-    toolbox = "C:\\Users\\Thomas.Maschler\\Documents\\GitHub\\geojson-madness\\GeoJSONUtilities.pyt"
+    toolbox = "D:\\scripts\\geojson-madness\\GeoJSONUtilities.pyt"
     return toolbox
