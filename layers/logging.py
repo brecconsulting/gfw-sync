@@ -16,7 +16,7 @@ def layers():
 
     LBR_Logging = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/5c3ce80d80df4d7f9f6a39a19f15b90d_0.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/5c3ce80d80df4d7f9f6a39a19f15b90d_0.geojson",
         'where_clause': "\"Status\" <> 'CANCELLED'", #make sure to escape quotes (\")
         'transformation': None,
         'fields': {
@@ -56,7 +56,7 @@ def layers():
   
     cmr_fmu = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/832f104b888c40c88491ce405d1cd896_7.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/832f104b888c40c88491ce405d1cd896_7.geojson",
         'where_clause': "",
         'transformation': None,
         'fields': {
@@ -76,7 +76,7 @@ def layers():
 
     cmr_fc = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/416a39b7eb344abea60fab4b79a03e51_9.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/416a39b7eb344abea60fab4b79a03e51_9.geojson",
         'where_clause': "",
         'transformation': None,
         'fields': {
@@ -96,7 +96,7 @@ def layers():
 
     gab_cfad = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/bc4b1dcc97a44c849de947365087dc64_14.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/bc4b1dcc97a44c849de947365087dc64_14.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -116,7 +116,7 @@ def layers():
 
     gab_cpaet = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/d9caac62192249c99d0dfa836cdb0664_15.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/d9caac62192249c99d0dfa836cdb0664_15.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -136,7 +136,7 @@ def layers():
 
     CAR_Logging = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/a5e9ec108ba2446289352272aa58f7a9_7.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/a5e9ec108ba2446289352272aa58f7a9_7.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -156,7 +156,7 @@ def layers():
 
     DRC_FC = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/2d56b275452f4eef94088dee3451153e_3.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/2d56b275452f4eef94088dee3451153e_3.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -176,7 +176,7 @@ def layers():
 
     GNQ_NF = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/dc2f57573ae14a6f934872785fecc1b2_5.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/dc2f57573ae14a6f934872785fecc1b2_5.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -196,7 +196,7 @@ def layers():
 
     COG_LC = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/f55797d780444c64a7121fe1f8296206_5.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/f55797d780444c64a7121fe1f8296206_5.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
@@ -216,7 +216,7 @@ def layers():
 
     IND_LC = {
         'location': "geojson_url",
-        'full_path': "http://globalforestwatch.gfw.opendata.arcgis.com/datasets/7625d42497034fa5b80a93d90525abfe_0.geojson",
+        'full_path': "http://data.gfw.opendata.arcgis.com/datasets/7625d42497034fa5b80a93d90525abfe_0.geojson",
         'where_clause': "",
         'transformation': "",
         'fields': {
