@@ -107,6 +107,9 @@ def merge(mlayer):
     #Add features, one layer at a time
     for layer in layers:
 
+        #Set output coordinate system to Web Mercator
+        #All ESRI web services are published using this projection
+
         print "Adding " + os.path.basename(layer['full_path'])
 
         # define transformation
@@ -185,6 +188,10 @@ def merge(mlayer):
         #   print "Failed to add " + layer['input_fc_name']
         #  traceback.print_exc()
 
+    #Set Output coordinate System to WGS 1984 for S3 Archive
+    #Vizzuality will download from here and needs the date in Lat/Lon
+
+    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984")
 
     # Export FeatureClass to Shapefile
     arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)

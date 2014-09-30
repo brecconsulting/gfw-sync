@@ -56,6 +56,7 @@ def add_to_s3(path, s3path, bucket):
 
     print 'Uploading to s3'
     k.set_contents_from_filename(path)
+    k.make_public()
     print 'Upload complete'
 
     return k
