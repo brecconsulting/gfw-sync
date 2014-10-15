@@ -69,8 +69,6 @@ def get_json_name(json_url):
     return json_name
 
 
-
-
 def merge(mlayer):
     # import layer file given in system argument
     global input_fc
