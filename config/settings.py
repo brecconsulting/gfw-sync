@@ -14,12 +14,7 @@ def get_target_gdb():
 
 def get_target_feature_classes():
     target_feature_classes = ["logging",
-                              "mining",
-                              "plantations",
-                              "land_right",
-                              "protected_areas",
-                              "resource_rights",
-                              "wood_fibre"]
+                              "people"]
     return target_feature_classes
 
 
