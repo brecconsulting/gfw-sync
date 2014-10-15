@@ -6,9 +6,9 @@ layers = settings.get_target_feature_classes()
 
 if __name__ == '__main__':
 
-    if len(sys.argv)>1:
+    if len(sys.argv)>0:
 
-        for i in range(1,len(sys.argv)):
+        for i in range(0,len(sys.argv)):
             if sys.argv[i] in layers:
                 print merge_layers.merge(sys.argv[i])
             else:
