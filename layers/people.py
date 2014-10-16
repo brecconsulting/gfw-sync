@@ -21,7 +21,7 @@ def layers():
         'transformation': "NAD_1983_To_WGS_1984_33",
         'fields': {
             'Name': ["field", "NAME"],
-            'Country': ["field", "Country"],
+            'Country': ["value", "CAN"],
             'Area_HA': ["field", "Area_Ha"],
             'National_Legal_Term': ["field", "Nat_Leg_Te"],
             'Legal_Recognition': ["field", "Leg_Rec"]
@@ -35,7 +35,7 @@ def layers():
         'transformation': None,
         'fields': {
             'Name': ["field", "Name"],
-            'Country': ["field", "Country"],
+            'Country': ["value", "NZL"],
             'Area_HA': ["field", "Area_ha"],
             'National_Legal_Term': ["field", "National_L"],
             'Legal_Recognition': ["field", "Legal_Reco"],
@@ -50,7 +50,7 @@ def layers():
         'transformation': None,
         'fields': {
             'Name': ["field", "Name"],
-            'Country': ["field", "Country"],
+            'Country': ["value", "BRA"],
             'Area_HA': ["field", "Area_ha"],
             'National_Legal_Term': ["field", "Nat_Leg_Te"],
             'Legal_Recognition': ["field", "Leg_Rec"],
@@ -65,7 +65,7 @@ def layers():
         'transformation': None,
         'fields': {
             'Name': ["field", "Name"],
-            'Country': ["field", "Country"],
+            'Country': ["value", "PAN"],
             'Area_HA': ["field", "Area_Ha"],
             'National_Legal_Term': ["field", "Nat_Leg_Te"],
             'Legal_Recognition': ["field", "Leg_Rec"],
@@ -80,7 +80,7 @@ def layers():
         'transformation': None,
         'fields': {
             'Name': ["field", "Name"],
-            'Country': ["field", "Country"],
+            'Country': ["value", "AUS"],
             'Area_HA': ["field", "Area_Ofcl"],
             'National_Legal_Term': ["field", "Category"],
             'Legal_Recognition': ["field", "Reco"],
