@@ -20,11 +20,11 @@ def layers():
         'where_clause': "",
         'transformation': "NAD_1983_To_WGS_1984_33",
         'fields': {
-            'Name': ["field", "NAME"],
-            'Country': ["value", "CAN"],
-            'Area_HA': ["field", "Area_Ha"],
-            'National_Legal_Term': ["field", "Nat_Leg_Te"],
-            'Legal_Recognition': ["field", "Leg_Rec"]
+            'name': ["field", "NAME"],
+            'country': ["value", "CAN"],
+            'area_ha': ["field", "Area_Ha"],
+            'national_legal_term': ["field", "Nat_Leg_Te"],
+            'legal_recognition': ["field", "Leg_Rec"]
             }
         }
 
@@ -34,12 +34,12 @@ def layers():
         'where_clause': "",
         'transformation': None,
         'fields': {
-            'Name': ["field", "Name"],
-            'Country': ["value", "NZL"],
-            'Area_HA': ["field", "Area_ha"],
-            'National_Legal_Term': ["field", "National_L"],
-            'Legal_Recognition': ["field", "Legal_Reco"],
-            'Category': ["value", "Land Rights"]
+            'name': ["field", "Name"],
+            'country': ["value", "NZL"],
+            'area_ha': ["field", "Area_ha"],
+            'national_legal_term': ["field", "National_L"],
+            'legal_recognition': ["field", "Legal_Reco"],
+            'category': ["value", "Land Rights"]
             }
         }
 
@@ -49,12 +49,12 @@ def layers():
         'where_clause': "",
         'transformation': None,
         'fields': {
-            'Name': ["field", "Name"],
-            'Country': ["value", "BRA"],
-            'Area_HA': ["field", "Area_ha"],
-            'National_Legal_Term': ["field", "Nat_Leg_Te"],
-            'Legal_Recognition': ["field", "Leg_Rec"],
-            'Category': ["value", "Land Rights"]
+            'name': ["field", "Name"],
+            'country': ["value", "BRA"],
+            'area_ha': ["field", "Area_ha"],
+            'national_legal_term': ["field", "Nat_Leg_Te"],
+            'legal_recognition': ["field", "Leg_Rec"],
+            'category': ["value", "Land Rights"]
             }
         }
   
@@ -64,12 +64,12 @@ def layers():
         'where_clause': "",
         'transformation': None,
         'fields': {
-            'Name': ["field", "Name"],
-            'Country': ["value", "PAN"],
-            'Area_HA': ["field", "Area_Ha"],
-            'National_Legal_Term': ["field", "Nat_Leg_Te"],
-            'Legal_Recognition': ["field", "Leg_Rec"],
-            'Category': ["value", "Land Rights"]
+            'name': ["field", "Name"],
+            'country': ["value", "PAN"],
+            'area_ha': ["field", "Area_Ha"],
+            'national_legal_term': ["field", "Nat_Leg_Te"],
+            'legal_recognition': ["field", "Leg_Rec"],
+            'category': ["value", "Land Rights"]
             }
         }
 
@@ -79,12 +79,12 @@ def layers():
         'where_clause': "",
         'transformation': None,
         'fields': {
-            'Name': ["field", "Name"],
-            'Country': ["value", "AUS"],
-            'Area_HA': ["field", "Area_Ofcl"],
-            'National_Legal_Term': ["field", "Category"],
-            'Legal_Recognition': ["field", "Reco"],
-            'Category': ["value", "Land Rights"]
+            'name': ["field", "Name"],
+            'country': ["value", "AUS"],
+            'area_ha': ["field", "Area_Ofcl"],
+            'national_legal_term': ["field", "Category"],
+            'legal_recognition': ["field", "Reco"],
+            'category': ["value", "Land Rights"]
             }
         }
   
