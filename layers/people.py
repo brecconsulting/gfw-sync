@@ -89,4 +89,4 @@ def layers():
         }
   
       #return layer list
-    return [Canada_Land_rights, NZL_Land_Rights, Brazil_Final, Comarcas_Final, Australia_Inalienable_Land_Rights]
+    return [Canada_Land_Rights, NZL_Land_Rights, Brazil_Final, Comarcas_Final, Australia_Inalienable_Land_Rights]
