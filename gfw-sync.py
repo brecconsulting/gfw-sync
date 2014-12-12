@@ -3,25 +3,6 @@ from config import settings
 import merge_layers
 import getopt
 
-
-# if __name__ == '__main__':
-#
-#     if len(sys.argv) > 1:
-#
-#         for i in range(1, len(sys.argv)):
-#             if sys.argv[i] in layers:
-#                 print merge_layers.merge(sys.argv[i])
-#             else:
-#                 print "Layer %s is not listed in config/settings.py" % sys.argv[i]
-#     else:
-#         for layer in layers:
-#             print merge_layers.merge(layer)
-
-
-
-
-
-
 def main(argv):
 
     layers = []
@@ -40,21 +21,22 @@ def main(argv):
         #    global _debug
         #    _debug = 1
         elif opt in ("-l", "--layer"):
-            layers.append(arg)
+            layers.append(arg.lower())
         elif opt in ("-c", "--country"):
-            countries.append(arg)
+            countries.append(arg.upper())
 
     if not len(layers):
         print len(layers)
-        layers = settings.get_target_feature_classes()
+        layers = settings.get_layerlist()
 
     merge_layers.merge(list(set(layers)), list(set(countries)))
 
 
 def usage():
-    layers = settings.get_target_feature_classes()
+    layers = settings.get_layerlist()
+    set = settings.get_settings()
 
-    print "GFW SYNC v%s" % settings.get_version()
+    print "%s v%s" % (set['name'], set['version'])
     print "Usage: gfw_sync.py [options]"
     print "Options:"
     print "-h, --help               Show help of GFW Sync Tool"
@@ -72,4 +54,5 @@ def usage():
 
 
 if __name__ == "__main__":
+
     main(sys.argv[1:])

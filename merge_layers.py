@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------
 # merge_layers.py
 # Created on: 2014-05-21 09:48:06.00000
@@ -7,7 +6,7 @@
 # Description: 
 # ---------------------------------------------------------------------------
 
-# Import arcpy module
+
 import arcpy
 import os
 import archiver
@@ -17,17 +16,7 @@ import traceback
 import string
 import urllib
 
-from config import settings
-
-#arcpy.ImportToolbox(settings.get_geojson_toolbox())
-
-
-def import_module(name):
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
+from config import settings as set
 
 
 def create_field_map(input_name, layer, field):
@@ -52,25 +41,39 @@ def empty_strings2null(fclass):
                                               "")
             arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
 
-# def get_bucket_name(s3_path):
-#     if len(string.split(s3_path,'\\'))>1:
-#         return string.split(s3_path,'\\')[0]
-#     elif len(string.split(s3_path,'/'))>1:
-#         return string.split(s3_path,'/')[0]
-#     else:
-#         return None
 
+def export2shp(feature_class, fc_name, scratch_folder, s3_bucket):
+    #Set Output coordinate System to WGS 1984 for S3 Archive
+    #Vizzuality will download from here and needs the date in Lat/Lon
 
-# def get_json_name(json_url):
-#
-#     url_list = json_url.split("/")
-#     json = url_list[len(url_list)-1].split("?")
-#     json_name = json[0]
-#     return json_name
+    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984")
+
+    # Export FeatureClass to Shapefile
+    arcpy.FeatureClassToShapefile_conversion([feature_class], scratch_folder)
+
+    # zip shapefile and push to Amazon S3 using archiver.py script
+    target_shp = os.path.join(scratch_folder, "%s.shp" % fc_name)
+    target_zip = os.path.join(scratch_folder, "%s.zip" % fc_name)
+    #s3_zip = os.path.join("data", "%s.zip" % target_fc_name)
+    s3_zip = "%s.zip" % fc_name
+
+    archiver.main(target_shp, target_zip, s3_zip, s3_bucket)
+
+    # clean up, delete shapefiles and zipfile
+    targets_rm = os.path.join(scratch_folder, "%s.*" % fc_name)
+    r = glob.glob(targets_rm)
+    for i in r:
+        os.remove(i)
+
 
 
 def merge(mlayers, mcountries):
 
+    layer_settings = set.get_layers()
+    settings = set.get_settings()
+
+    target_ws = settings['paths']['target_gdb']
+    scratch_folder = settings['paths']['scrach_folder']
 
     for mlayer in mlayers:
 
@@ -78,20 +81,22 @@ def merge(mlayers, mcountries):
         # import layer file given in system argument
         global input_fc
 
-        try:
-            import_layers = import_module('layers.' + mlayer)
-        except ImportError:
+        layers = []
+        for ls in layer_settings:
+            if ls['name'] == mlayer:
+
+                s3_bucket = ls['bucket']
+                for key in mydictionary.keys():
+                    if key != 'name' and key != 'bucket':
+                        layers.append(ls[key])
+
+        if not len(layers):
             print "Warning: Layer %s is not defined" % mlayer
             break
 
         # get layer settings
-        target_ws = settings.get_target_gdb()
-        target_fc_name = mlayer
-        scratch_folder = settings.get_scratch_folder()
-        s3_bucket = settings.get_download_bucket()
 
-        #scratch_gdb =  settings.get_scratch_gdb()
-        #bucket_drives = settings.get_bucket_drive()
+        target_fc_name = "gfw_%s" % mlayer
 
         layers = import_layers.layers()
 
@@ -101,10 +106,6 @@ def merge(mlayers, mcountries):
 
         # set environment parameters
         arcpy.env.overwriteOutput = True
-
-        #Set output coordinate system to Web Mercator
-        #All ESRI web services are published using this projection
-        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
 
 
         if not len(mcountries):
@@ -123,14 +124,16 @@ def merge(mlayers, mcountries):
         # Compact target file-geodatabase to avoid running out of ObjectIDs
         arcpy.Compact_management(target_ws)
 
-
-
-
-
         #Add features, one layer at a time
         for layer in layers:
 
-            if (layer['fields']['country'][1] in mcountries) or (not len(mcountries)):
+
+
+            if (layer['country'] in mcountries) or (not len(mcountries)):
+
+                #Set output coordinate system to Web Mercator
+                #All ESRI web services are published using this projection
+                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
 
                 print "Adding " + os.path.basename(layer['full_path'])
 
@@ -141,27 +144,6 @@ def merge(mlayers, mcountries):
                 # create feature layer from feature class
 
                 input_fc = layer['full_path']
-
-                #if layer['location'].lower() == 'server':
-                #   input_fc = layer['full_path']
-                # elif layer['location'].lower() == 's3':
-                #
-                #     s3_bucket_drive = bucket_drives[get_bucket_name(layer['full_path'])]
-                #     s3_path = layer['full_path'][len(get_bucket_name(layer['full_path'])):]
-                #
-                #     input_fc = os.path.join(s3_bucket_drive, s3_path)
-                #
-                # elif layer['location'].lower() == 'geojson_url':
-                #
-                #     json_name = get_json_name(layer['full_path'])
-                #     json = os.path.join(scratch_folder, json_name)
-                #     #urllib.urlretrieve(layer['full_path'], os.path.join(scratch_folder, json_name))
-                #     input_fc = os.path.join(scratch_gdb, "geojson_" + json_name[:-8])
-                #     arcpy.ImportGeoJSONFromURL_geojsonconversion(layer['full_path'], input_fc)
-                #     #geojson_to_features(json,input_fc)
-                #     #arcpy.JSONToFeatures_conversion(json, input_fc)
-
-
 
                 input_layer = os.path.basename('%s_layer') % input_fc
 
@@ -190,48 +172,55 @@ def merge(mlayers, mcountries):
 
                 arcpy.MakeFeatureLayer_management(target_fc,
                                                   target_layer,
-                                                  "country IS NULL OR country = '%s'" % layer['fields']['country'][1],
+                                                  "country IS NULL",
                                                   "",
                                                   "")
+
+                arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
+
                 for field in layer['fields']:
                     if layer['fields'][field]:
 
-                        if layer['fields'][field][0] == 'value':
+                        if layer['fields'][field][0].lower() == 'value':
                             arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
 
-                        elif layer['fields'][field][0] == 'expression':
+                        elif layer['fields'][field][0].lower() == 'expression':
                             arcpy.CalculateField_management(target_layer, field, "%s" % layer['fields'][field][1], "PYTHON", "")
 
                 #convert empty strings ('') to NULL
                 empty_strings2null(input_fc)
 
-                # reset transformation
+                fc_name = os.path.basename(input_fc).split('.')[0]
+
+
+                fc_copy = os.path.join(target_ws, target_fc_name, fc_name)
+
+                if arcpy.Exists(fc_copy):
+                    arcpy.Delete_management(fc_copy)
+                arcpy.FeatureClassToFeatureClass_conversion(input_fc, os.path.join(target_ws,target_fc_name), fc_name)
+
+
+                #Set output coordinate system to local projection
+                #Shape files on S3 for country layers are published in their original projection
+
+                desc = arcpy.describe(input_fc)
+                arcpy.env.outputCoordinateSystem = desc.spatialReference
+                export2shp(input_fc, fc_name, scratch_folder, s3_bucket)
+
+                #Reset Transformation
                 arcpy.env.geographicTransformations = ""
 
-                #except:
-                #   print "Failed to add " + layer['input_fc_name']
-                #  traceback.print_exc()
+
+
+
 
         #Set Output coordinate System to WGS 1984 for S3 Archive
         #Vizzuality will download from here and needs the date in Lat/Lon
 
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984")
 
-        # Export FeatureClass to Shapefile
-        arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
+        export2shp(target_fc, target_fc_name, scratch_folder, s3_bucket)
 
-        # zip shapefile and push to Amazon S3 using archiver.py script
-        target_shp = os.path.join(scratch_folder, "%s.shp" % target_fc_name)
-        target_zip = os.path.join(scratch_folder, "%s.zip" % target_fc_name)
-        #s3_zip = os.path.join("data", "%s.zip" % target_fc_name)
-        s3_zip = "%s.zip" % target_fc_name
 
-        archiver.main(target_shp, target_zip, s3_zip, s3_bucket)
-
-        # clean up, delete shapefiles and zipfile
-        targets_rm = os.path.join(scratch_folder, "%s.*" % target_fc_name)
-        r = glob.glob(targets_rm)
-        for i in r:
-            os.remove(i)
 
 
