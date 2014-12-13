@@ -8,6 +8,8 @@ import os
 import subprocess
 import zipfile
 
+import shutil
+
 import boto
 from boto.s3.key import Key
 
@@ -70,23 +72,31 @@ def upload(path, s3path, bucket_name):
 
     return dict(zip_path=path, bucket=bucket_name, s3path=s3path)
 
-def main(shp_path, zip_path, s3path, bucket_name):
+#def main(shp_path, zip_path, s3path, bucket_name):
+def main(shp_path, zip_path, s3_folder):
 
     print 'Processing %s' % shp_path
 
     zip(shp_path, zip_path)
 
-    dct = upload(zip_path, s3path, bucket_name)
-    dct['shapefile'] = shp_path
+    s3_path = os.path.join(s3_folder,os.path.basename(zip_path))
+
+    shutil.copyfile(zip_path, s3_path)
+    
+    
+    #dct = upload(zip_path, s3path, bucket_name)
+    #dct['shapefile'] = shp_path
 
     print 'Processing complete.'
 
-    return dct
+    #return dct
 
 if __name__ == '__main__':
     shp_path = sys.argv[1]
     zip_path = sys.argv[2]
-    s3path = sys.argv[3]
-    bucket_name = sys.argv[4]
+    zip_folder = sys.argv[3]
+    #s3path = sys.argv[3]
+    #bucket_name = sys.argv[4]
 
-    print main(shp_path, zip_path, s3path, bucket_name)
+    main(shp_path, zip_path, s3_folder)
+    #print main(shp_path, zip_path, s3path, bucket_name)
