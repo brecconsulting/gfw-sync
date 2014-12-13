@@ -20,6 +20,7 @@ from config import settings as set
 
 
 def create_field_map(input_name, layer, field):
+  
     fm = arcpy.FieldMap()
     fm.addInputField(input_name, layer['fields'][field][1])
     output_field = fm.outputField
@@ -42,11 +43,7 @@ def empty_strings2null(fclass):
             arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
 
 
-def export2shp(feature_class, fc_name, scratch_folder, s3_bucket):
-    #Set Output coordinate System to WGS 1984 for S3 Archive
-    #Vizzuality will download from here and needs the date in Lat/Lon
-
-    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984")
+def export2shp(feature_class, fc_name, scratch_folder, s3_folder):
 
     # Export FeatureClass to Shapefile
     arcpy.FeatureClassToShapefile_conversion([feature_class], scratch_folder)
@@ -54,10 +51,9 @@ def export2shp(feature_class, fc_name, scratch_folder, s3_bucket):
     # zip shapefile and push to Amazon S3 using archiver.py script
     target_shp = os.path.join(scratch_folder, "%s.shp" % fc_name)
     target_zip = os.path.join(scratch_folder, "%s.zip" % fc_name)
-    #s3_zip = os.path.join("data", "%s.zip" % target_fc_name)
-    s3_zip = "%s.zip" % fc_name
-
-    archiver.main(target_shp, target_zip, s3_zip, s3_bucket)
+    #s3_zip = os.path.join("data", "%s.zip" % target_fc_name)  
+    
+    archiver.main(target_shp, target_zip, s3_folder)
 
     # clean up, delete shapefiles and zipfile
     targets_rm = os.path.join(scratch_folder, "%s.*" % fc_name)
@@ -73,10 +69,9 @@ def merge(mlayers, mcountries):
     settings = set.get_settings()
 
     target_ws = settings['paths']['target_gdb']
-    scratch_folder = settings['paths']['scrach_folder']
+    scratch_folder = settings['paths']['scratch_folder']
 
     for mlayer in mlayers:
-
 
         # import layer file given in system argument
         global input_fc
@@ -86,8 +81,10 @@ def merge(mlayers, mcountries):
             if ls['name'] == mlayer:
 
                 s3_bucket = ls['bucket']
-                for key in mydictionary.keys():
-                    if key != 'name' and key != 'bucket':
+                s3_folder = os.path.join("F:\\", ls['folder'],"zip")
+                
+                for key in ls.keys():
+                    if key != 'name' and key != 'bucket' and key != 'folder':
                         layers.append(ls[key])
 
         if not len(layers):
@@ -97,8 +94,6 @@ def merge(mlayers, mcountries):
         # get layer settings
 
         target_fc_name = "gfw_%s" % mlayer
-
-        layers = import_layers.layers()
 
         #define name for target feature class and target feature layer
         target_fc = os.path.join(target_ws, target_fc_name)
@@ -113,22 +108,20 @@ def merge(mlayers, mcountries):
             arcpy.DeleteFeatures_management(target_fc)
         else:
             where_clause = ""
-            for country in countries:
+            for country in mcountries:
                 if where_clause == "":
                     where_clause = 'country = %s' % country
                 else:
                     where_clause = '%s OR country = %s' % (where_clause, country)
-            arcpy.MakeFeatureLayer_management(target_fc, replace_layer, where_clause)
-            arcpy.DeleteFeatures_management(replace_layer)
+            arcpy.MakeFeatureLayer_management(target_fc, "replace_layer", where_clause)
+            arcpy.DeleteFeatures_management("replace_layer")
 
         # Compact target file-geodatabase to avoid running out of ObjectIDs
         arcpy.Compact_management(target_ws)
 
         #Add features, one layer at a time
         for layer in layers:
-
-
-
+            
             if (layer['country'] in mcountries) or (not len(mcountries)):
 
                 #Set output coordinate system to Web Mercator
@@ -170,6 +163,7 @@ def merge(mlayers, mcountries):
 
                 # Update field values, for un-mapped fields
 
+                print "Update fields"
                 arcpy.MakeFeatureLayer_management(target_fc,
                                                   target_layer,
                                                   "country IS NULL",
@@ -193,19 +187,19 @@ def merge(mlayers, mcountries):
                 fc_name = os.path.basename(input_fc).split('.')[0]
 
 
-                fc_copy = os.path.join(target_ws, target_fc_name, fc_name)
+                fc_copy = os.path.join(target_ws, mlayer, fc_name)
 
                 if arcpy.Exists(fc_copy):
                     arcpy.Delete_management(fc_copy)
-                arcpy.FeatureClassToFeatureClass_conversion(input_fc, os.path.join(target_ws,target_fc_name), fc_name)
+                arcpy.FeatureClassToFeatureClass_conversion(input_fc, os.path.join(target_ws,mlayer), fc_name)
 
 
                 #Set output coordinate system to local projection
                 #Shape files on S3 for country layers are published in their original projection
 
-                desc = arcpy.describe(input_fc)
+                desc = arcpy.Describe(input_fc)
                 arcpy.env.outputCoordinateSystem = desc.spatialReference
-                export2shp(input_fc, fc_name, scratch_folder, s3_bucket)
+                export2shp(input_fc, fc_name, scratch_folder, s3_folder)
 
                 #Reset Transformation
                 arcpy.env.geographicTransformations = ""
@@ -219,7 +213,7 @@ def merge(mlayers, mcountries):
 
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984")
 
-        export2shp(target_fc, target_fc_name, scratch_folder, s3_bucket)
+        export2shp(target_fc, target_fc_name, scratch_folder, s3_folder)
 
 
 
