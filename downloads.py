@@ -15,7 +15,7 @@ def unzip(source_filename, dest_dir):
 
 
 url = "http://wcmc.io/wdpa_current_release"
-path = "C:\\temp"  #"D:\\GIS Data\\Global"
+path = "D:\\GIS Data\\Global"
 
 zip_name = "wdpa_current_release.zip"
 zip_path = os.path.join(path, zip_name)
