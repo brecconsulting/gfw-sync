@@ -81,7 +81,7 @@ def merge(mlayers, mcountries):
             if ls['name'] == mlayer:
 
                 s3_bucket = ls['bucket']
-                s3_folder = os.path.join("F:\\", ls['folder'],"zip")
+                s3_folder = os.path.join(set['bucket_drives'][s3_bucket], ls['folder'],"zip")
                 
                 for key in ls.keys():
                     if key != 'name' and key != 'bucket' and key != 'folder':
