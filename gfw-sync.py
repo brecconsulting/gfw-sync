@@ -32,7 +32,7 @@ def main(argv):
             countries.append(arg.upper())
 
     if not len(layers):
-        print len(layers)
+        #print len(layers)
         layers = settings.get_layerlist()
 
     merge_layers.merge(list(set(layers)), list(set(countries)))
@@ -43,7 +43,7 @@ def usage():
     set = settings.get_settings()
 
     print "%s v%s" % (set['name'], set['version'])
-    print "Usage: gfw_sync.py [options]"
+    print "Usage: gfw-sync.py [options]"
     print "Options:"
     print "-h, --help               Show help of GFW Sync Tool"
     print "-v, --validate           Validate all config files before update"
