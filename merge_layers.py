@@ -16,7 +16,7 @@ import traceback
 import string
 import urllib
 
-from config import settings as set
+from config import settings as sets
 
 
 def create_field_map(input_name, layer, field):
@@ -65,8 +65,8 @@ def export2shp(feature_class, fc_name, scratch_folder, s3_folder):
 
 def merge(mlayers, mcountries):
 
-    layer_settings = set.get_layers()
-    settings = set.get_settings()
+    layer_settings = sets.get_layers()
+    settings = sets.get_settings()
 
     target_ws = settings['paths']['target_gdb']
     scratch_folder = settings['paths']['scratch_folder']
@@ -81,7 +81,7 @@ def merge(mlayers, mcountries):
             if ls['name'] == mlayer:
 
                 s3_bucket = ls['bucket']
-                s3_folder = os.path.join(set['bucket_drives'][s3_bucket], ls['folder'],"zip")
+                s3_folder = os.path.join(settings['bucket_drives'][s3_bucket], ls['folder'],"zip")
                 
                 for key in ls.keys():
                     if key != 'name' and key != 'bucket' and key != 'folder':
@@ -110,9 +110,9 @@ def merge(mlayers, mcountries):
             where_clause = ""
             for country in mcountries:
                 if where_clause == "":
-                    where_clause = 'country = %s' % country
+                    where_clause = "country = '%s'" % country
                 else:
-                    where_clause = '%s OR country = %s' % (where_clause, country)
+                    where_clause = "%s OR country = '%s'" % (where_clause, country)
             arcpy.MakeFeatureLayer_management(target_fc, "replace_layer", where_clause)
             arcpy.DeleteFeatures_management("replace_layer")
 

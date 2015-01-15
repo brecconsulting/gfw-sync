@@ -31,6 +31,10 @@ def validate():
 
             gfw_layer = "gfw_%s" % ls['name']
 
+            ########
+            #Still need a test here to check if bucket for layer is linked to a Drive (setting) and that folder exists on S3
+           ############ 
+
             if not arcpy.Exists(gfw_layer):
                 print "ERROR: feature class %s does not exist in target geodatabase" % gfw_layer
                 print "Create feature class or validate spelling"
