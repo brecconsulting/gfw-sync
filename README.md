@@ -19,14 +19,14 @@ Command line
 gfw-sync.py [options]
 
 Options:
-	-h, --hel			Show help of GFW Sync Tool
-	-v, --validat			Validate all config files before update
-	-c {country ISO3 code}		Country to be updated. Update will affect all selected layers.
-					If left out, all countries will be selected.
-					You can use this option multiple times
+	-h, --help				Show help of GFW Sync Tool
+	-v, --validate			Validate all config files before update
+	-c {country ISO3 code}	Country to be updated. Update will affect all selected layers.
+							If left out, all countries will be selected.
+							You can use this option multiple times
 	-l {GFW layer name}		GFW Layer, which will be updated. Update will affect all selected countries
-					If left out, all layers will be selected.
-					You can use this option multiple times
+							If left out, all layers will be selected.
+							You can use this option multiple times
 ```
 
 
