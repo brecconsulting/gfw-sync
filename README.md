@@ -3,51 +3,43 @@ gfw-sync
 
 Synchronization stuff for easier management of GFW data
 
+#### Dependencies
+
+3rd party Python Extentions:
+arcpy
+configobj
+
+Others:
+CloudBerry Drive
 
 #### Usage
 
-To update all layers call
-
 Command line
 ```shell
-python gfw_sync.py
+gfw-sync.py [options]
+
+Options:
+	-h, --help               Show help of GFW Sync Tool"
+    	-v, --validate           Validate all config files before update"
+	-c <country ISO3 code>   Country to be updated. Update will affect all selected layers."
+	                         If left out, all countries will be selected."
+	                         You can use this option multiple times"
+    	-l <GFW layer name>      GFW Layer, which will be updated. Update will affect all selected countries"
+	                         If left out, all layers will be selected."
+	                         You can use this option multiple times"
 ```
 
-To update specific layers call
-
-Command line
-```shell
-python gfw_sync.py -l logging 
-```
-
-To update specific countries call
-
-Command line
-```shell
-python gfw_sync.py -c CAN
-```
-
-Update specific layer for a country
-
-Command line
-```shell
-python gfw_sync.py -l logging -c CAN
-```
-
-
-Validate config file
-
-Command line
-```shell
-python gfw_sync.py -v
-```
 
 Python:
 ```python
 >>> import merge_layers
 >>> merge_layers.merge(['logging'],['CAN'])
 ```
+### Script Configuration
 
+Script is configured in config/settings.ini
+
+You can define drive names for S3 buckets as well as target and scratch GDB
 
 
 ### Layer Configuration
