@@ -5,11 +5,10 @@ Synchronization stuff for easier management of GFW data
 
 #### Dependencies
 
-3rd party Python Extentions:
-arcpy
-configobj
+***3rd party Python Extentions:***
+arcpy, configobj
 
-Others:
+***Others:***
 CloudBerry Drive
 
 #### Usage
