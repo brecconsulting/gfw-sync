@@ -17,80 +17,125 @@ To update specific layers call
 
 Command line
 ```shell
-python gfw_sync.py logging mining
+python gfw_sync.py -l logging 
 ```
 
+To update specific countries call
+
+Command line
+```shell
+python gfw_sync.py -c CAN
+```
+
+Update specific layer for a country
+
+Command line
+```shell
+python gfw_sync.py -l logging -c CAN
+```
+
+
+Validate config file
+
+Command line
+```shell
+python gfw_sync.py -v
+```
 
 Python:
 ```python
 >>> import merge_layers
->>> merge_layers.merge('logging')
+>>> merge_layers.merge(['logging'],['CAN'])
 ```
 
 
 
-### Configuration
+### Layer Configuration
 
-Layer files live in the layer folder and must have suffix .py
-You can add as many layer files as you want.
+Layers are congigured in layer folder. Each layer has its own INI file.
+New INI files will be detected automatically.
 
-All layer files must contain function "layers()"
+Each INI files has a header with layer specific parameters. In the body, parameters for included datatsets are listed.
 
-Layers() function must return a list with layers.
 
-Layers are Python dictionaries with the following keys:
+####Layer file header
 
-1. Location
-2. Full Path to file or feature class
-3. Where clause
-4. Transformation
-5. Fields
+```ini
+name = {name of GFW layer}
+bucket = {name of S3 bucket}
+folder = {name of folder in S3 bucket}
+```
 
-Fields is also a python dictionary, keys correspond to field names in target feature class; values can contain field names, fixed values or expressions
-There must be at least a field called "country" for any target dataset
+####Layer file body
 
+For each dataset the following parameters must be listed
+```ini
+[{in dataset name}]
+country = {ISO3 code}
+location = {Server of S3}
+full_path = {full path on server or on S3}
+where_clause = {SQL expression as used in ArcMap definition query}
+transformation = {ArcGIS transformation name  
+```
+In addition to general parameters a field map must be provided for each dataset. For each field one of the following option can be used
+
+```ini
+[[fields]]
+{out field name} = field, {in field name}
+{out field name} = value, {value}
+{out field name} = expression, {PYTHON expression, as used in ArcMap field calculator}
+```
+
+Strings with white spaces need to be in quotes.
+If no value is given, parameter will be ignored.
 
 #### Example
 
-Logging layers must follow the following schema
+Land Rights Layer layers must follow the following schema
 
-```python
-    layer_name = {
-        'location: "" # Either "S3" or "Server"
-        'full_path': "" # Full path to file or feature class. For server including Drive name, for s3 including bucket name. For geodatabases including feature dataset name
-        'where_clause': "",  # Definition query (same as syntax as Definition Query in ArcMap. Leave empty quotes ("") if no filter is applied
-        'transformation': "",  # ArcGIS transformation. Leave empty quotes ("") or type None (without quotes) if no transformation is needed
-        'fields': {
+```ini
+## GFW Land Rights Layer
 
-            # for all fields:
-            # if corresponding field exists type ["field", "fieldname"], fieldname is case sensitive!
-            # if you want to add a fixed value for all fields type ["value", "some text"]
-            # if you want to add an expression based type ["expression", "some expression"], expression must correspond to Python expression in "Calculate Field" Tool
-            # Example: ["expression", "!SHAPE_Area!/10000"]
-            # if you want to leave the field blank type None (without quotes and squared brackets)
+name = land_rights
+bucket = gfw2-data
+folder = people\land_rights
 
-            'country': [],  # should always be["value", "3 letter ISO-Code"],
-            'year': [],  #  should always be ["value", now.year]
-            'type': [],
-            'name': [],
-            'company': [],
-            'group_company': [],
-            'group_country': [],
-            'province': [],
-            'status': [],
-            'area_ha': [],
-            'source': [],
-            'shape_length': [],  # optional, can be left out
-            'shape_area': []  # optional, can be left out
-        }
-    }
+## Australia
+
+[aus_land_rights]
+country = AUS
+location = Server
+full_path = F:\people\land_rights\aus_land_rights.shp
+where_clause =
+transformation = AGD_1966_To_WGS_1984  
+    [[fields]]
+    # country = value, AUS
+    name = field, Name
+    legal_term = field, Legal_Term
+    legal_reco = field, Reco
+    area_ha = 
+    source = value, "Commonwealth of Australia (Geoscience Australia)"
+    last_updat = value, 2014
+	
+## Brazil
+
+[bra_land_rights]
+country = BRA
+location = Server
+full_path = F:\people\land_rights\bra_land_rights.shp
+where_clause =
+transformation = SAD_1969_To_WGS_1984_14  
+    [[fields]]
+    # country = value, BRA
+    name = field, Name
+    legal_term = field, Nat_Leg_Te
+    legal_reco = field, Leg_Rec
+    area_ha = field, Area_ha
+    source = value, "Fundação Nacional do Índio (FUNAI)"
+    last_updat = value, 2014
 ```
 
-afterwards add input file to country list at the end of file
 
-```python
-countries = [layer_name_1, layer_name_2, ...]
-```
 
 
 
