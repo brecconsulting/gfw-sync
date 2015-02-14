@@ -3,16 +3,15 @@ gfw-sync
 
 Synchronization stuff for easier management of GFW data
 
-#### Dependencies
+### Dependencies
 
-**3rd party Python Extentions:**
-arcpy, configobj
+arcpy
 
+configobj
 
-**Others:**
 CloudBerry Drive
 
-#### Usage
+### Usage
 
 Command line
 ```shell
