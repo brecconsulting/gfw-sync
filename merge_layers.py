@@ -170,12 +170,22 @@ def merge(mlayers, mcountries):
                                                   "",
                                                   "")
 
+                #This is a work around. Features in layer get unselected after update of the country field. Better to select them by ID
+                id_field = "OBJECTID"  
+                min_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " A").next().getValue(id_field) #Get 1st row in ascending cursor sort  
+                max_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " D").next().getValue(id_field) #Get 1st row in descending cursor sort
+                arcpy.MakeFeatureLayer_management(target_fc,
+                                                  target_layer,
+                                                  "OBJECTID >= %s AND OBJECTID <= %s" % (min_id, max_id),
+                                                  "",
+                                                  "")
+                
                 arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
-
+  
                 for field in layer['fields']:
                     if layer['fields'][field]:
-
-                        if layer['fields'][field][0].lower() == 'value':
+                        
+                        if layer['fields'][field][0].lower() == 'value':                            
                             arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
 
                         elif layer['fields'][field][0].lower() == 'expression':
