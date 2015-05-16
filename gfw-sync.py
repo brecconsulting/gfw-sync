@@ -1,15 +1,17 @@
 import sys
-from config import settings
-import merge_layers
-import validate
 import getopt
+
+import merge_layers
+import settings
+import validate_ini
+
 
 def main(argv):
 
     layers = []
     countries = []
     try:
-        opts, args = getopt.getopt(argv, "hvl:c:", ["help", "validate", "layer=", "country="])
+        opts, args = getopt.getopt(argv, "hvl:c:", ["help", "validate", "layers=", "country="])
     except getopt.GetoptError:
         print "Error: Invalide argument"
         usage()
@@ -22,11 +24,11 @@ def main(argv):
         #    global _debug
         #    _debug = 1
         if opt in ("-v", "--validate"):
-            validate.validate()
+            validate_ini.validate()
             input_var = raw_input("Do you want to continue (Y/N): ")
             if input_var[0].lower() != 'y':
                 sys.exit()
-        elif opt in ("-l", "--layer"):
+        elif opt in ("-l", "--layers"):
             layers.append(arg.lower())
         elif opt in ("-c", "--country"):
             countries.append(arg.upper())
@@ -50,7 +52,7 @@ def usage():
     print "-c <country ISO3 code>   Country to be updated. Update will affect all selected layers."
     print "                         If left out, all countries will be selected."
     print "                         You can use this option multiple times"
-    print "-l <GFW layer name>      GFW Layer, which will be updated. Update will affect all selected countries"
+    print "-l <GFW layers name>      GFW Layer, which will be updated. Update will affect all selected countries"
     print "                         If left out, all layers will be selected."
     print "                         You can use this option multiple times"
     print "                         Currently supported layers:"

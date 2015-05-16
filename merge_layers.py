@@ -7,16 +7,13 @@
 # ---------------------------------------------------------------------------
 
 
-import arcpy
 import os
-import archiver
 import glob
-import sys
-import traceback
-import string
-import urllib
 
-from config import settings as sets
+import arcpy
+
+import archiver
+import settings as sets
 
 
 def create_field_map(input_name, layer, field):
@@ -73,7 +70,7 @@ def merge(mlayers, mcountries):
 
     for mlayer in mlayers:
 
-        # import layer file given in system argument
+        # import layers file given in system argument
         global input_fc
 
         layers = []
@@ -91,11 +88,11 @@ def merge(mlayers, mcountries):
             print "Warning: Layer %s is not defined" % mlayer
             break
 
-        # get layer settings
+        # get layers config
 
         target_fc_name = "gfw_%s" % mlayer
 
-        #define name for target feature class and target feature layer
+        #define name for target feature class and target feature layers
         target_fc = os.path.join(target_ws, target_fc_name)
         target_layer = '%s_layer' % target_fc_name
 
@@ -119,7 +116,7 @@ def merge(mlayers, mcountries):
         # Compact target file-geodatabase to avoid running out of ObjectIDs
         arcpy.Compact_management(target_ws)
 
-        #Add features, one layer at a time
+        #Add features, one layers at a time
         for layer in layers:
             
             if (layer['country'] in mcountries) or (not len(mcountries)):
@@ -134,7 +131,7 @@ def merge(mlayers, mcountries):
                 if layer['transformation']:
                     arcpy.env.geographicTransformations = layer['transformation']
 
-                # create feature layer from feature class
+                # create feature layers from feature class
 
                 input_fc = layer['full_path']
 
@@ -154,7 +151,7 @@ def merge(mlayers, mcountries):
                         if layer['fields'][field][0] == 'field':
                             fms.addFieldMap(create_field_map(input_layer, layer, field))
 
-                # append layer to target feature class
+                # append layers to target feature class
                 arcpy.Append_management(input_layer,
                                         target_fc,
                                         "NO_TEST",
@@ -170,7 +167,7 @@ def merge(mlayers, mcountries):
                                                   "",
                                                   "")
 
-                #This is a work around. Features in layer get unselected after update of the country field. Better to select them by ID
+                #This is a work around. Features in layers get unselected after update of the country field. Better to select them by ID
                 id_field = "OBJECTID"  
                 min_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " A").next().getValue(id_field) #Get 1st row in ascending cursor sort  
                 max_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " D").next().getValue(id_field) #Get 1st row in descending cursor sort
