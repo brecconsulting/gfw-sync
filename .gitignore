@@ -55,3 +55,6 @@ docs/_build/
 
 # Config files
 config/*.config
+
+#pycharm
+.idea/
