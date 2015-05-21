@@ -13,15 +13,16 @@ import glob
 import arcpy
 
 import archiver
-import settings as sets
+import settings
+import metadata
 
 
-def create_field_map(input_name, layer, field):
+def create_field_map(layer_name, input_field_name, output_field_name):
   
     fm = arcpy.FieldMap()
-    fm.addInputField(input_name, layer['fields'][field][1])
+    fm.addInputField(layer_name, input_field_name)
     output_field = fm.outputField
-    output_field.name = field
+    output_field.name = output_field_name
     fm.outputField = output_field
 
     return fm
@@ -32,11 +33,7 @@ def empty_strings2null(fclass):
     if desc.dataType == 'FeatureClass':
         string_fields = [f.name for f in arcpy.ListFields(fclass, None, 'String')]
         for string_field in string_fields:
-            arcpy.MakeFeatureLayer_management(fclass,
-                                              "update_layer",
-                                              '"%s" = \'\'' % string_field,
-                                              "",
-                                              "")
+            arcpy.MakeFeatureLayer_management(fclass, "update_layer", '"%s" = \'\'' % string_field, "", "")
             arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
 
 
@@ -59,8 +56,159 @@ def export2shp(feature_class, fc_name, scratch_folder, s3_folder):
         os.remove(i)
 
 
+def get_layer_def(layer_name, layer_defs):
+    for layer in layer_defs:
+        if layer == layer_name:
+            return layer_defs[layer]
+    return False
 
-def merge(mlayers, mcountries):
+
+def remove_features(fc, countries):
+    if not len(countries):
+        # Deletes all features in target feature class
+        arcpy.DeleteFeatures_management(fc)
+    else:
+        where_clause = ""
+        for country in countries:
+            if where_clause == "":
+                where_clause = "country = '%s'" % country
+            else:
+                where_clause = "%s OR country = '%s'" % (where_clause, country)
+            arcpy.MakeFeatureLayer_management(fc, "layer", where_clause)
+            arcpy.DeleteFeatures_management("layer")
+
+    # Compact target file-geodatabase to avoid running out of ObjectIDs
+    arcpy.Compact_management(arcpy.env.workspace)
+
+
+def remove_countries_from_description(desc, countries, layer_def):
+    if not len(countries):
+        elements = metadata.get_all_description_elements(desc)
+        for element in elements:
+            if element != "global":
+                desc = metadata.remove_description_element(desc, element)
+    else:
+        for layer in layer_def['layers']:
+            if layer_def['layers'][layer]['country'] in countries:
+                desc = metadata.remove_description_element(desc, layer)
+    return desc
+
+
+def merge(layers, countries):
+
+    sets = settings.get_settings()
+    layer_defs = settings.get_layers()
+
+    workspace = sets['paths']['workspace']
+    scratchWorkspace = sets['paths']['scratch_workspace']
+    arcpy.env.overwriteOutput = True
+
+    for layer_name in layers:
+
+        layer_def = get_layer_def(layer_name, layer_defs)
+
+        if not layer_def:
+            print "Layer %s does is not defined. Skip" % layer_name
+            break
+
+        arcpy.env.workspace = os.path.join(workspace, layer_def['gdb'])
+        s3_drive = sets['bucket_drives'][layer_def['bucket']]
+        s3_folder = os.path.join(s3_drive, layer_def['folder'])
+
+        target_fc = layer_name
+        target_shp = os.path.join(s3_folder, layer_name['shapefile'])
+        remove_features(target_fc, countries)
+
+        meta = os.path.join(scratchWorkspace,"%s.xml" % layer_name)
+
+        meta_desc = metadata.get_metadata_description_element(meta)
+        meta_desc = remove_countries_from_description(meta_desc, countries, layer_def)
+
+        #remove countries from tags
+        #remove countries from place keywords
+        #remove countries from extent
+
+        for l in layer_def['layers']:
+            layer = layer_def['layers'][l]
+            if layer['country'] in countries or not len(countries):
+
+                print "Add %s" % layer['alias']
+
+                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
+                if layer['transformation']:
+                    arcpy.env.geographicTransformations = layer['transformation']
+
+                input_fc = os.path.join(s3_folder, layer['shapefile'])
+                input_layer = "input_layer"
+
+                arcpy.MakeFeatureLayer_management(input_fc, input_layer, layer['where_clause'], "", "")
+
+                fms = arcpy.FieldMappings()
+
+                for field in layer['fields']:
+                    if layer['fields'][field]:
+                        if layer['fields'][field][0] == 'field':
+                            fms.addFieldMap(create_field_map(input_layer, layer['fields'][field][1], field))
+
+                # append layers to target feature class
+                arcpy.Append_management(input_layer, target_fc, "NO_TEST", fms, "")
+
+                print "Update fields"
+                target_layer = "target_layer"
+                arcpy.MakeFeatureLayer_management(target_fc, target_layer, "country IS NULL", "", "")
+
+                for field in layer['fields']:
+                    if layer['fields'][field]:
+
+                        if layer['fields'][field][0].lower() == 'value':
+                            arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
+
+                        elif layer['fields'][field][0].lower() == 'expression':
+                            arcpy.CalculateField_management(target_layer, field, "%s" % layer['fields'][field][1], "PYTHON", "")
+
+                arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
+
+                #convert empty strings ('') to NULL
+                empty_strings2null(input_fc)
+
+                #get country metadata description
+                #update metadata description
+                #update tags
+                #update keywords
+                #update extent
+
+                #import country shapefile
+                #place ZIP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    update metadata
+
+    export to shapefile (WGS)
+    zip shapefile (WGS)
+    zip shapefile (local proj)
+    zip shapefile (local with date)
+
+    copy shapefile S3
+    copy all zip files (zip and archive)
+
+    delete temp files
+
+
+    ####
 
     layer_settings = sets.get_layers()
     settings = sets.get_settings()
@@ -168,21 +316,21 @@ def merge(mlayers, mcountries):
                                                   "")
 
                 #This is a work around. Features in layers get unselected after update of the country field. Better to select them by ID
-                id_field = "OBJECTID"  
-                min_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " A").next().getValue(id_field) #Get 1st row in ascending cursor sort  
+                id_field = "OBJECTID"
+                min_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " A").next().getValue(id_field) #Get 1st row in ascending cursor sort
                 max_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " D").next().getValue(id_field) #Get 1st row in descending cursor sort
                 arcpy.MakeFeatureLayer_management(target_fc,
                                                   target_layer,
                                                   "OBJECTID >= %s AND OBJECTID <= %s" % (min_id, max_id),
                                                   "",
                                                   "")
-                
+
                 arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
-  
+
                 for field in layer['fields']:
                     if layer['fields'][field]:
-                        
-                        if layer['fields'][field][0].lower() == 'value':                            
+
+                        if layer['fields'][field][0].lower() == 'value':
                             arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
 
                         elif layer['fields'][field][0].lower() == 'expression':
