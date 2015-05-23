@@ -112,8 +112,6 @@ def append_description_element(desc, attrib, text):
             desc_element = ET.SubElement(element, "DIV")
             desc_element.attrib['ID'] = attrib
             desc_element.text = text
-
-            #element.append(desc_element)
             break
     desc = ET.tostring(root)
     print desc
@@ -196,7 +194,6 @@ def merge(layers, countries):
         meta_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["description"])
         meta_extent_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["extent_description"])
         meta_tags = layer_def["keywords"]
-        #meta_tags = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["tags"])
         meta_place_keywords = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["place_keywords"])
 
 
