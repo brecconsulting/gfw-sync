@@ -1,20 +1,12 @@
 #!/usr/bin/env python2.7
 
-"""This module zips up a shapefile's constituent parts and uploads
-them to S3."""
 
-import sys
 import os
-import subprocess
 import zipfile
-
 import shutil
+import time
+import datetime
 
-import boto
-from boto.s3.key import Key
-
-# standard shell command to generate flat zipfile
-BASECMD = 'zip -j %s %s*'
 
 def gen_paths(shp):
     basepath, fname = os.path.split(shp)
@@ -22,81 +14,61 @@ def gen_paths(shp):
 
     return basepath, fname, base_fname
 
+
 def add_to_zip(dirname, fname, zf):
+
     full_path = os.path.join(dirname, fname)
-    
     print 'Writing %s to archive' % os.path.splitext(fname)[1]
-    zf.write(full_path, fname) # flatten zipfile
+    # flatten zipfile
+    zf.write(full_path, fname)
 
     return
 
-def zip(shp, dst):
+
+def zip_shapefile(shp, dst, local):
 
     basepath, fname, base_fname = gen_paths(shp)
 
-    zf = zipfile.ZipFile(dst, 'w', allowZip64=False)
+    if local:
+        zip_name = base_fname + ".zip"
+    else:
+        zip_name = base_fname + "_local.zip"
+
+    zip_path = os.path.join(dst, zip_name)
+    zf = zipfile.ZipFile(zip_path, 'w', allowZip64=False)
 
     for dirname, subdirs, files in os.walk(basepath):
-        print 'Zipping %s' % shp
         for f in files:
-            if (base_fname in f) and (f != os.path.basename(dst)):  # only process components of specified shapefile
+            if (base_fname in f) and (f != zip_name):
                 add_to_zip(dirname, f, zf)
 
     zf.close()
 
     print '\nZip archive complete:\n%s' % dst
 
-    return
+    return zip_name
 
-def create_bucket_conn(bucket_name):
-    conn = boto.connect_s3() # requires creds in environment
-    return conn.create_bucket(bucket_name)
 
-def add_to_s3(path, s3path, bucket):
-    k = Key(bucket)
-    k.key = s3path
-
-    print 'Uploading to s3'
-    k.set_contents_from_filename(path)
-    k.make_public()
-    print 'Upload complete'
-
-    return k
-
-def upload(path, s3path, bucket_name):
-    """Upload file to S3."""
-
-    bucket = create_bucket_conn(bucket_name)
-
-    k = add_to_s3(path, s3path, bucket)
-
-    return dict(zip_path=path, bucket=bucket_name, s3path=s3path)
-
-#def main(shp_path, zip_path, s3path, bucket_name):
-def main(shp_path, zip_path, s3_folder):
+def archive_shapefile(shp_path, zip_folder, dst_folder=None, arc_folder=None, local=False):
 
     print 'Processing %s' % shp_path
 
-    zip(shp_path, zip_path)
+    zip_name = zip_shapefile(shp_path, zip_folder, local)
 
-    s3_path = os.path.join(s3_folder,os.path.basename(zip_path))
+    if dst_folder is not None:
+        src = os.path.join(zip_folder, zip_name)
+        dst = os.path.join(dst_folder, zip_name)
+        print "Copy ZIP archive to %s" % dst_folder
+        shutil.copy(src, dst)
 
-    shutil.copyfile(zip_path, s3_path)
-    
-    
-    #dct = upload(zip_path, s3path, bucket_name)
-    #dct['shapefile'] = shp_path
+    if arc_folder is not None:
+        ts = time.time()
+        timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
+        src = os.path.join(zip_folder, zip_name)
+        dst = os.path.join(arc_folder, "%s_%s.zip" % (zip_name, timestamp))
+        shutil.copy(src, dst)
 
     print 'Processing complete.'
 
-    #return dct
 
-if __name__ == '__main__':
-    shp_path = sys.argv[1]
-    zip_path = sys.argv[2]
-    zip_folder = sys.argv[3]
-    #s3path = sys.argv[3]
-    #bucket_name = sys.argv[4]
 
-    main(shp_path, zip_path, s3_folder)
-    #print main(shp_path, zip_path, s3path, bucket_name)

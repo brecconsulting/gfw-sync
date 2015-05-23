@@ -24,7 +24,7 @@ def get_country_iso3_list():
     return get_ini_file('config', 'country_iso3.ini')
 
 
-def get_metadata_dictionary():
+def get_metadata_keys():
     return get_ini_file('config', 'metadata.ini')
 
 

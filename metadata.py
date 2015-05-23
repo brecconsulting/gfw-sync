@@ -46,13 +46,13 @@ def get_metadata_file(fc):
         sets = settings.get_settings()
         temp_folder = sets['paths']['scratch_workspace']
         out_file = os.path.join(temp_folder, fc + ".xml")
-        export_metadata(fc, out_file)
-        return {"file": out_file, "format": "FGDC"}
+        copy_metadata(fc, out_file)
+        return out_file
 
     elif data_type == "ShapeFile":
-        return {"file": fc + ".xml", "format": "ARCGIS"}
+        return fc + ".xml"
 
-def get_metadata_elements(metadata, e):
+def get_metadata_elements_by_key(metadata, e):
     tree = ET.parse(metadata)
     root = tree.getroot()
 
@@ -64,7 +64,7 @@ def get_metadata_elements(metadata, e):
     return elements
 
 
-def get_metadata_element(metadata, e_tree):
+def get_metadata_element_by_etree(metadata, e_tree):
     d = {}
     tree = ET.parse(metadata)
     root = tree.getroot()
@@ -76,48 +76,22 @@ def get_metadata_element(metadata, e_tree):
         if i == len(e_tree):
             return d[i].text
 
-
-
-def get_metadata_description_element(metadata):
-    desc = get_metadata_elements(metadata, "idAbs")[0]
-    return desc
-
-
-def get_all_description_elements(desc):
+def get_metadata_elements_by_etree(metadata, e_tree):
     elements = []
-    root = ET.fromstring(desc)
-    for parent in root.findall("DIV"):
-        for element in parent.findall("DIV"):
-            if "ID" in element.attrib:
-                elements.append(element.attrib["ID"])
+    d = {}
+    tree = ET.parse(metadata)
+    root = tree.getroot()
+    i = 0
+    d[i] = [root]
+    for e in e_tree:
+        i += 1
+        d[i] = []
+        for p in d[i-1]:
+            d[i] = d[i] + p.findall(e)
+        for j in range(len(d[i])):
+            if i == len(e_tree):
+                elements.append(d[i][j].text)
     return elements
-
-
-def remove_description_element(desc, desc_attrib):
-    root = ET.fromstring(desc)
-    for parent in root.findall("DIV"):
-        for element in parent.findall("DIV"):
-            if "ID" in element.attrib:
-                if element.attrib["ID"] == desc_attrib:
-                    print ET.tostring(element)
-                    parent.remove(element)
-    desc = ET.tostring(root)
-    return desc
-
-
-def append_description_element(desc, attrib, text):
-    root = ET.fromstring(desc)
-    for element in root.findall("DIV"):
-        if not len(element.attrib):
-            print "Found"
-            desc_element = ET.SubElement(element, "DIV")
-            desc_element.attrib['ID'] = attrib
-            desc_element.text = text
-
-            #element.append(desc_element)
-            break
-    desc = ET.tostring(root)
-    print desc
 
 
 def update_metadata_element(metadata, e_tree, e_text):
@@ -133,3 +107,4 @@ def update_metadata_element(metadata, e_tree, e_text):
             d[i].text = cgi.escape(e_text)
 
     tree.write(metadata)
+

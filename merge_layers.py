@@ -11,7 +11,7 @@ import os
 import glob
 
 import arcpy
-
+import xml.etree.ElementTree as ET
 import archiver
 import settings
 import metadata
@@ -36,24 +36,6 @@ def empty_strings2null(fclass):
             arcpy.MakeFeatureLayer_management(fclass, "update_layer", '"%s" = \'\'' % string_field, "", "")
             arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
 
-
-def export2shp(feature_class, fc_name, scratch_folder, s3_folder):
-
-    # Export FeatureClass to Shapefile
-    arcpy.FeatureClassToShapefile_conversion([feature_class], scratch_folder)
-
-    # zip shapefile and push to Amazon S3 using archiver.py script
-    target_shp = os.path.join(scratch_folder, "%s.shp" % fc_name)
-    target_zip = os.path.join(scratch_folder, "%s.zip" % fc_name)
-    #s3_zip = os.path.join("data", "%s.zip" % target_fc_name)  
-    
-    archiver.main(target_shp, target_zip, s3_folder)
-
-    # clean up, delete shapefiles and zipfile
-    targets_rm = os.path.join(scratch_folder, "%s.*" % fc_name)
-    r = glob.glob(targets_rm)
-    for i in r:
-        os.remove(i)
 
 
 def get_layer_def(layer_name, layer_defs):
@@ -81,17 +63,83 @@ def remove_features(fc, countries):
     arcpy.Compact_management(arcpy.env.workspace)
 
 
+def get_all_description_elements(desc):
+    elements = []
+    root = ET.fromstring(desc)
+    for parent in root.findall("DIV"):
+        for element in parent.findall("DIV"):
+            if "ID" in element.attrib:
+                elements.append(element.attrib["ID"])
+    return elements
+
+
+def get_description_text(desc):
+    root = ET.fromstring(desc)
+    for parent in root.findall("DIV"):
+        for element in parent.findall("DIV"):
+            if element.find("P"):
+                return ET.tostring(element)[5:-6]
+
+
+def remove_description_element(desc, desc_attrib):
+    root = ET.fromstring(desc)
+    for parent in root.findall("DIV"):
+        for element in parent.findall("DIV"):
+            if "ID" in element.attrib:
+                if element.attrib["ID"] == desc_attrib:
+                    print ET.tostring(element)
+                    parent.remove(element)
+    desc = ET.tostring(root)
+    return desc
+
+
 def remove_countries_from_description(desc, countries, layer_def):
     if not len(countries):
-        elements = metadata.get_all_description_elements(desc)
+        elements = get_all_description_elements(desc)
         for element in elements:
             if element != "global":
-                desc = metadata.remove_description_element(desc, element)
+                desc = remove_description_element(desc, element)
     else:
         for layer in layer_def['layers']:
             if layer_def['layers'][layer]['country'] in countries:
-                desc = metadata.remove_description_element(desc, layer)
+                desc = remove_description_element(desc, layer)
     return desc
+
+
+def append_description_element(desc, attrib, text):
+    root = ET.fromstring(desc)
+    for element in root.findall("DIV"):
+        if not len(element.attrib):
+            desc_element = ET.SubElement(element, "DIV")
+            desc_element.attrib['ID'] = attrib
+            desc_element.text = text
+
+            #element.append(desc_element)
+            break
+    desc = ET.tostring(root)
+    print desc
+
+
+def remove_countries_from_place_keywords(keywords, countries):
+    if not len(countries):
+        return []
+    else:
+        return keywords
+
+def add_country_to_place_keywords(keywords, country):
+    iso3 = settings.get_country_iso3_list()
+    if country.upper() in iso3:
+        if not iso3[country].lower() in keywords:
+            keywords.append(iso3[country].lower())
+    return keywords
+
+
+def import_shapefile(shp, gdb, fc):
+    arcpy.env.workspace = gdb
+    if arcpy.Exists(fc):
+        arcpy.Delete_management(fc)
+    arcpy.FeatureClassToFeatureClass_conversion(shp, gdb, fc)
+
 
 
 def merge(layers, countries):
@@ -100,7 +148,11 @@ def merge(layers, countries):
     layer_defs = settings.get_layers()
 
     workspace = sets['paths']['workspace']
-    scratchWorkspace = sets['paths']['scratch_workspace']
+    scratch_workspace = sets['paths']['scratch_workspace']
+
+    default_srs = sets['spatial_references']['default_srs']
+    gdb_srs = sets['spatial_references']['gdb_srs']
+
     arcpy.env.overwriteOutput = True
 
     for layer_name in layers:
@@ -111,22 +163,29 @@ def merge(layers, countries):
             print "Layer %s does is not defined. Skip" % layer_name
             break
 
-        arcpy.env.workspace = os.path.join(workspace, layer_def['gdb'])
-        s3_drive = sets['bucket_drives'][layer_def['bucket']]
-        s3_folder = os.path.join(s3_drive, layer_def['folder'])
+        gdb = os.path.join(workspace, layer_def['gdb'])
+        arcpy.env.workspace = gdb
+        drive = sets['bucket_drives'][layer_def['bucket']]
+        layer_folder = os.path.join(drive, layer_def['folder'])
+        zip_folder = os.path.join(layer_folder, sets['folders']['zip_folder'])
+        archive_folder = os.path.join(layer_folder, sets['folders']['archive_folder'])
 
         target_fc = layer_name
-        target_shp = os.path.join(s3_folder, layer_name['shapefile'])
+        target_shp = os.path.join(layer_folder, layer_def['shapefile'])
+
+        metadata_keys = settings.get_metadata_keys()
+        meta = metadata.get_metadata_file(target_fc)
+
+        meta_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["description"])
+        meta_extent_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["extent_description"])
+        meta_tags = layer_def["keywords"]
+        #meta_tags = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["tags"])
+        meta_place_keywords = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["place_keywords"])
+
+
         remove_features(target_fc, countries)
-
-        meta = os.path.join(scratchWorkspace,"%s.xml" % layer_name)
-
-        meta_desc = metadata.get_metadata_description_element(meta)
         meta_desc = remove_countries_from_description(meta_desc, countries, layer_def)
-
-        #remove countries from tags
-        #remove countries from place keywords
-        #remove countries from extent
+        meta_place_keywords = remove_countries_from_place_keywords(meta_place_keywords, countries)
 
         for l in layer_def['layers']:
             layer = layer_def['layers'][l]
@@ -134,11 +193,11 @@ def merge(layers, countries):
 
                 print "Add %s" % layer['alias']
 
-                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
+                arcpy.env.outputCoordinateSystem = gdb_srs
                 if layer['transformation']:
                     arcpy.env.geographicTransformations = layer['transformation']
 
-                input_fc = os.path.join(s3_folder, layer['shapefile'])
+                input_fc = os.path.join(layer_folder, layer['shapefile'])
                 input_layer = "input_layer"
 
                 arcpy.MakeFeatureLayer_management(input_fc, input_layer, layer['where_clause'], "", "")
@@ -171,205 +230,40 @@ def merge(layers, countries):
                 #convert empty strings ('') to NULL
                 empty_strings2null(input_fc)
 
-                #get country metadata description
-                #update metadata description
-                #update tags
-                #update keywords
-                #update extent
+                country_meta = metadata.get_metadata_file(input_fc)
+                country_meta_desc = metadata.get_metadata_element_by_etree(country_meta, metadata_keys["ARCGIS"]["description"])
+                country_meta_desc = get_description_text(country_meta_desc)
 
-                #import country shapefile
-                #place ZIP
+                meta_desc = append_description_element(meta_desc, l, country_meta_desc)
+                meta_place_keywords = add_country_to_place_keywords(meta_place_keywords, layer['country'])
 
+                import_shapefile(input_fc, gdb, l)
 
+                #archive local shapefile
+                archiver.archive_shapefile(input_fc, scratch_workspace, zip_folder, archive_folder, True)
 
+                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
+                # Export FeatureClass to Shapefile
+                arcpy.FeatureClassToShapefile_conversion([input_fc], scratch_workspace)
+                export_shp = os.path.join(scratch_workspace, layer['shapefile'])
+                archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
 
-
-
-
-
-
-
-
-
-
-
-
-
-    update metadata
-
-    export to shapefile (WGS)
-    zip shapefile (WGS)
-    zip shapefile (local proj)
-    zip shapefile (local with date)
-
-    copy shapefile S3
-    copy all zip files (zip and archive)
-
-    delete temp files
-
-
-    ####
-
-    layer_settings = sets.get_layers()
-    settings = sets.get_settings()
-
-    target_ws = settings['paths']['target_gdb']
-    scratch_folder = settings['paths']['scratch_folder']
-
-    for mlayer in mlayers:
-
-        # import layers file given in system argument
-        global input_fc
-
-        layers = []
-        for ls in layer_settings:
-            if ls['name'] == mlayer:
-
-                s3_bucket = ls['bucket']
-                s3_folder = os.path.join(settings['bucket_drives'][s3_bucket], ls['folder'],"zip")
-                
-                for key in ls.keys():
-                    if key != 'name' and key != 'bucket' and key != 'folder':
-                        layers.append(ls[key])
-
-        if not len(layers):
-            print "Warning: Layer %s is not defined" % mlayer
-            break
-
-        # get layers config
-
-        target_fc_name = "gfw_%s" % mlayer
-
-        #define name for target feature class and target feature layers
-        target_fc = os.path.join(target_ws, target_fc_name)
-        target_layer = '%s_layer' % target_fc_name
-
-        # set environment parameters
-        arcpy.env.overwriteOutput = True
-
-
-        if not len(mcountries):
-            # Deletes all features in target feature class
-            arcpy.DeleteFeatures_management(target_fc)
-        else:
-            where_clause = ""
-            for country in mcountries:
-                if where_clause == "":
-                    where_clause = "country = '%s'" % country
-                else:
-                    where_clause = "%s OR country = '%s'" % (where_clause, country)
-            arcpy.MakeFeatureLayer_management(target_fc, "replace_layer", where_clause)
-            arcpy.DeleteFeatures_management("replace_layer")
-
-        # Compact target file-geodatabase to avoid running out of ObjectIDs
-        arcpy.Compact_management(target_ws)
-
-        #Add features, one layers at a time
-        for layer in layers:
-            
-            if (layer['country'] in mcountries) or (not len(mcountries)):
-
-                #Set output coordinate system to Web Mercator
-                #All ESRI web services are published using this projection
-                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984 Web Mercator (auxiliary sphere)")
-
-                print "Adding " + os.path.basename(layer['full_path'])
-
-                # define transformation
-                if layer['transformation']:
-                    arcpy.env.geographicTransformations = layer['transformation']
-
-                # create feature layers from feature class
-
-                input_fc = layer['full_path']
-
-                input_layer = os.path.basename('%s_layer') % input_fc
-
-                arcpy.MakeFeatureLayer_management(input_fc,
-                                                  input_layer,
-                                                  layer['where_clause'],
-                                                  "",
-                                                  "")
-
-                # map fields
-                fms = arcpy.FieldMappings()
-
-                for field in layer['fields']:
-                    if layer['fields'][field]:
-                        if layer['fields'][field][0] == 'field':
-                            fms.addFieldMap(create_field_map(input_layer, layer, field))
-
-                # append layers to target feature class
-                arcpy.Append_management(input_layer,
-                                        target_fc,
-                                        "NO_TEST",
-                                        fms,
-                                        "")
-
-                # Update field values, for un-mapped fields
-
-                print "Update fields"
-                arcpy.MakeFeatureLayer_management(target_fc,
-                                                  target_layer,
-                                                  "country IS NULL",
-                                                  "",
-                                                  "")
-
-                #This is a work around. Features in layers get unselected after update of the country field. Better to select them by ID
-                id_field = "OBJECTID"
-                min_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " A").next().getValue(id_field) #Get 1st row in ascending cursor sort
-                max_id = arcpy.SearchCursor(target_layer, "", "", "", id_field + " D").next().getValue(id_field) #Get 1st row in descending cursor sort
-                arcpy.MakeFeatureLayer_management(target_fc,
-                                                  target_layer,
-                                                  "OBJECTID >= %s AND OBJECTID <= %s" % (min_id, max_id),
-                                                  "",
-                                                  "")
-
-                arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
-
-                for field in layer['fields']:
-                    if layer['fields'][field]:
-
-                        if layer['fields'][field][0].lower() == 'value':
-                            arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
-
-                        elif layer['fields'][field][0].lower() == 'expression':
-                            arcpy.CalculateField_management(target_layer, field, "%s" % layer['fields'][field][1], "PYTHON", "")
-
-                #convert empty strings ('') to NULL
-                empty_strings2null(input_fc)
-
-                fc_name = os.path.basename(input_fc).split('.')[0]
-
-
-                fc_copy = os.path.join(target_ws, mlayer, fc_name)
-
-                if arcpy.Exists(fc_copy):
-                    arcpy.Delete_management(fc_copy)
-                arcpy.FeatureClassToFeatureClass_conversion(input_fc, os.path.join(target_ws,mlayer), fc_name)
-
-
-                #Set output coordinate system to local projection
-                #Shape files on S3 for country layers are published in their original projection
-
-                desc = arcpy.Describe(input_fc)
-                arcpy.env.outputCoordinateSystem = desc.spatialReference
-                export2shp(input_fc, fc_name, scratch_folder, s3_folder)
-
-                #Reset Transformation
                 arcpy.env.geographicTransformations = ""
 
 
+    #update tags
+    #update extent
 
+    #update metadata
 
+    #export to shapefile (WGS)
+    #zip shapefile (WGS)
+    #zip shapefile (local proj)
+    #zip shapefile (local with date)
 
-        #Set Output coordinate System to WGS 1984 for S3 Archive
-        #Vizzuality will download from here and needs the date in Lat/Lon
+    #copy shapefile S3
+    #copy all zip files (zip and archive)
 
-        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference("WGS 1984")
-
-        export2shp(target_fc, target_fc_name, scratch_folder, s3_folder)
-
-
+    #delete temp files
 
 
