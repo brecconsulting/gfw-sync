@@ -1,4 +1,5 @@
 import arcpy
+import xml
 import xml.etree.ElementTree as ET
 import os
 import settings
@@ -16,7 +17,7 @@ def copy_metadata(fc, output):
     arcpy.XSLTransform_conversion(fc, xslt, output)
 
 
-def export_metadata(fc, output_file, translator="FGDC"):
+def export_metadata(fc, output_file, translator="ISO"):
     #Directory containing ArcGIS Install files
     installDir = arcpy.GetInstallInfo("desktop")["InstallDir"]
     #Path to XML schema for FGDC
@@ -28,7 +29,7 @@ def export_metadata(fc, output_file, translator="FGDC"):
     arcpy.ExportMetadata_conversion(fc, translator, output_file)
 
 
-def import_metadata(input_file, fc, format="ARCGIS"):
+def import_metadata(fc, metadata, format="ARCGIS"):
     if format == "ARCGIS":
         import_type = "FROM_ARCGIS"
     elif format == "ESRI":
@@ -37,14 +38,17 @@ def import_metadata(input_file, fc, format="ARCGIS"):
         import_type = "FROM_FGDC"
     elif format == "ISO":
         import_type = "FROM_ISO_19139"
-    arcpy.ImportMetadata_conversion(input_file, import_type, fc)
+    arcpy.ImportMetadata_conversion(metadata, import_type, fc)
 
 
 def get_metadata_file(fc):
     data_type = get_datatype(fc)
     if data_type == "FeatureClass":
         sets = settings.get_settings()
-        temp_folder = sets['paths']['scratch_workspace']
+        if os.path.exists(sets['paths']['scratch_workspace']):
+            temp_folder = sets['paths']['scratch_workspace']
+        else:
+            temp_folder = arcpy.env.scratchFolder
         out_file = os.path.join(temp_folder, fc + ".xml")
         copy_metadata(fc, out_file)
         return out_file
@@ -105,6 +109,28 @@ def update_metadata_element(metadata, e_tree, e_text):
         d[i] = d[i-1].find(e)
         if i == len(e_tree):
             d[i].text = cgi.escape(e_text)
-
     tree.write(metadata)
+    return metadata
+
+
+def update_metadata_elements(metadata, e_tree, e_text_list):
+    d = {}
+    tree = ET.parse(metadata)
+    root = tree.getroot()
+    i = 0
+    d[i] = [root]
+    for e in e_tree:
+        i += 1
+        d[i] = []
+        for p in d[i-1]:
+            d[i] = d[i] + p.findall(e)
+        if i == len(e_tree):
+            for j in range(len(d[i])):
+                p.remove(d[i][j])
+            for e_text in e_text_list:
+                child = ET.Element(e)
+                child.text = e_text
+                p.append(child)
+    tree.write(metadata)
+    return metadata
 

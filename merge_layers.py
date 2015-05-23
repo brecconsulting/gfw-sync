@@ -9,7 +9,6 @@
 
 import os
 import glob
-
 import arcpy
 import xml.etree.ElementTree as ET
 import archiver
@@ -126,6 +125,7 @@ def remove_countries_from_place_keywords(keywords, countries):
     else:
         return keywords
 
+
 def add_country_to_place_keywords(keywords, country):
     iso3 = settings.get_country_iso3_list()
     if country.upper() in iso3:
@@ -134,12 +134,29 @@ def add_country_to_place_keywords(keywords, country):
     return keywords
 
 
+def update_tags(tags, countries):
+    for country in countries:
+        tags = tags + [country.lower()]
+    return tags
+
+
+def update_extent_desc(countries):
+    extent_desc = "Currently available for "
+    i = 0
+    for country in countries:
+        i += 1
+        if i < len(countries):
+            extent_desc = extent_desc + country + ", "
+        else:
+            extent_desc = extent_desc + "and " + country
+    return extent_desc
+
+
 def import_shapefile(shp, gdb, fc):
     arcpy.env.workspace = gdb
     if arcpy.Exists(fc):
         arcpy.Delete_management(fc)
     arcpy.FeatureClassToFeatureClass_conversion(shp, gdb, fc)
-
 
 
 def merge(layers, countries):
@@ -194,6 +211,7 @@ def merge(layers, countries):
                 print "Add %s" % layer['alias']
 
                 arcpy.env.outputCoordinateSystem = gdb_srs
+
                 if layer['transformation']:
                     arcpy.env.geographicTransformations = layer['transformation']
 
@@ -248,22 +266,28 @@ def merge(layers, countries):
                 export_shp = os.path.join(scratch_workspace, layer['shapefile'])
                 archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
 
-                arcpy.env.geographicTransformations = ""
+        meta_tags = update_tags(meta_tags, meta_place_keywords)
+        meta_extent_desc = update_extent_desc(meta_place_keywords)
 
+        meta = metadata.update_metadata_element(meta, metadata_keys["ARCGIS"]["description"], meta_desc)
+        meta = metadata.update_metadata_element(meta, metadata_keys["ARCGIS"]["extent_description"], meta_extent_desc)
 
-    #update tags
-    #update extent
+        meta = metadata.update_metadata_elements(meta, metadata_keys["ARCGIS"]["tags"], meta_tags)
+        meta = metadata.update_metadata_elements(meta, metadata_keys["ARCGIS"]["place_keywords"], meta_place_keywords)
 
-    #update metadata
+        metadata.import_metadata(target_fc, meta)
 
-    #export to shapefile (WGS)
-    #zip shapefile (WGS)
-    #zip shapefile (local proj)
-    #zip shapefile (local with date)
+        arcpy.env.geographicTransformations = ""
 
-    #copy shapefile S3
-    #copy all zip files (zip and archive)
+        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
+        arcpy.FeatureClassToShapefile_conversion(target_fc, layer_folder, layer_def['shapefile'])
+        archiver.archive_shapefile(target_shp, scratch_workspace, zip_folder, archive_folder, False)
 
-    #delete temp files
+        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(gdb_srs)
+        arcpy.FeatureClassToShapefile_conversion(target_fc, scratch_workspace, layer_def['shapefile'])
+        export_shp = os.path.join(scratch_workspace, layer_def['shapefile'])
+        archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, True)
 
-
+        files = glob.glob(os.path.join(scratch_workspace, "*.*"))
+        for f in files:
+            os.remove(f)
