@@ -28,16 +28,21 @@ def get_metadata_keys():
     return get_ini_file('config', 'metadata.ini')
 
 
-def get_layers():
-    layers = []
+def get_layer_ini_files():
     abspath = os.path.abspath(__file__)
     dir_name = os.path.dirname(abspath)
     layer_folder = os.path.join(dir_name, 'layers')
-    for f in glob.glob(r"%s\*.ini" % layer_folder):
+    ini_files = glob.glob(r"%s\*.ini" % layer_folder)
+        
+    return ini_files
+
+
+def get_layers():
+    layers = []
+    for f in get_layer_ini_files():
         layers.append(ConfigObj(f))
 
     return layers
-
 
 def get_layer_list():
 
@@ -47,6 +52,7 @@ def get_layer_list():
         layer_list.append(layer.keys()[0])
 
     return layer_list
+
 
 
 

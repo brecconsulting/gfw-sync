@@ -321,7 +321,7 @@ def validate_settings(l=True, v=True):
     return errors, warnings
 
 
-def validate_layers(ini_file, countries, l=True, v=True):
+def validate_layer(ini_file, layer_name, countries, l=True, v=True):
 
     log_info("", l, v)
     log_info("Validate parameters of %s" % ini_file, l, v)
@@ -333,118 +333,120 @@ def validate_layers(ini_file, countries, l=True, v=True):
     sets = settings.get_settings()
     layers = settings.get_layers_from_file(ini_file)
 
-    for key in layers.keys():
+    for l in layers:
 
-        log_info("", l, v)
-        log_info("Layer %s" % key, l, v)
-        #print ""
-        #print "Layer %s" % key
-        layer = layers[key]
+        if l == layer_name:
 
-        gdb = os.path.join(sets['paths']['workspace'], layer['gdb'])
-        gdb = validate_gdb(gdb, l, v)
+            log_info("", l, v)
+            log_info("Layer %s" % layer_name, l, v)
+            #print ""
+            #print "Layer %s" % key
+            layer = layers[layer_name]
 
-        if gdb:
-            fc = os.path.join(gdb, key)
-            fc = validate_feature_class(fc, l, v)
-            if not fc:
+            gdb = os.path.join(sets['paths']['workspace'], layer['gdb'])
+            gdb = validate_gdb(gdb, l, v)
+
+            if gdb:
+                fc = os.path.join(gdb, layer_name)
+                fc = validate_feature_class(fc, l, v)
+                if not fc:
+                    errors += 1
+            else:
+                log_msg("feature class %s: skipped" % layer_name, "w", l, v)
+                #print "[WARNING] feature class %s: skipped" % layer_name
+                fc = False
                 errors += 1
-        else:
-            log_msg("feature class %s: skipped" % key, "w", l, v)
-            #print "[WARNING] feature class %s: skipped" % key
-            fc = False
-            errors += 1
-            warnings += 1
+                warnings += 1
 
-        bucket_drive = validate_bucket(layer['bucket'], sets['bucket_drives'], l, v)
+            bucket_drive = validate_bucket(layer['bucket'], sets['bucket_drives'], l, v)
 
-        if bucket_drive:
-            folder = os.path.join(bucket_drive, layer['folder'])
-            folder = validate_folder(folder, l, v)
-            if not folder:
+            if bucket_drive:
+                folder = os.path.join(bucket_drive, layer['folder'])
+                folder = validate_folder(folder, l, v)
+                if not folder:
+                    errors += 1
+            else:
+                log_msg("folder %s: skipped" % layer['folder'], "w", l, v)
+                #print "[WARNING] folder %s: skipped" % layer['folder']
+                folder = False
                 errors += 1
-        else:
-            log_msg("folder %s: skipped" % layer['folder'], "w", l, v)
-            #print "[WARNING] folder %s: skipped" % layer['folder']
-            folder = False
-            errors += 1
-            warnings += 1
-            
+                warnings += 1
+                
 
-        if layer['type'] == 'simple':
-            if folder:
-                shp = os.path.join(folder, layer['shapefile'])
-                shp = validate_shapefile(shp, l, v)
-                if shp:
-                    if layer['where_clause']:
-                        where_clause = validate_where(shp, layer['where_clause'])
-                        if not where_clause:
-                            errors += 1
-                    if layer['transformation']:
-                        transformation = validate_transformation(shp, sets['spatial_references']['default_srs'], layer['transformation'], l, v)
-                        if not transformation:
-                            errors += 1
+            if layer['type'] == 'simple':
+                if folder:
+                    shp = os.path.join(folder, layer['shapefile'])
+                    shp = validate_shapefile(shp, l, v)
+                    if shp:
+                        if layer['where_clause']:
+                            where_clause = validate_where(shp, layer['where_clause'])
+                            if not where_clause:
+                                errors += 1
+                        if layer['transformation']:
+                            transformation = validate_transformation(shp, sets['spatial_references']['default_srs'], layer['transformation'], l, v)
+                            if not transformation:
+                                errors += 1
+                    else:
+                        log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
+                        log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
+                        #print "[WARNING] where clause %s: skipped" % layer['where_clause']
+                        #print "[WARNING] transformation %s: skipped" % layer['transformation']
+                        errors += 1
+                        warnings += 2
                 else:
+                    log_msg("shapefile %s: skipped" % layer['shapefile'], "w", l, v)
                     log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
                     log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
-                    #print "[WARNING] where clause %s: skipped" % layer['where_clause']
-                    #print "[WARNING] transformation %s: skipped" % layer['transformation']
-                    errors += 1
-                    warnings += 2
-            else:
-                log_msg("shapefile %s: skipped" % layer['shapefile'], "w", l, v)
-                log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
-                log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
-                #print "[WARNING: shapefile %s: skipped" % layer['shapefile']
-                #print "[WARNING: where clause %s: skipped" % layer['where_clause']
-                #print "[WARNING: transformation %s: skipped" % layer['transformation']
-                warnings += 3
-        elif layer['type'] == 'merge':
-            if folder:
-                for c_layer in layer['layers']:
-                    country_layer = layer['layers'][c_layer]
-                    if country_layer["country"] in countries or not len(countries):
-                        log_info("", l, v)
-                        log_info("Country layer %s" % c_layer, l, v)
-                        #print ""
-                        #print "Country layer %s" % c_layer
+                    #print "[WARNING: shapefile %s: skipped" % layer['shapefile']
+                    #print "[WARNING: where clause %s: skipped" % layer['where_clause']
+                    #print "[WARNING: transformation %s: skipped" % layer['transformation']
+                    warnings += 3
+            elif layer['type'] == 'merge':
+                if folder:
+                    for c_layer in layer['layers']:
                         country_layer = layer['layers'][c_layer]
-                        shp = os.path.join(folder, country_layer['shapefile'])
-                        shp = validate_shapefile(shp, l, v)
-                        if shp:
-                            if country_layer['where_clause']:
-                                where_clause = validate_where(shp, country_layer['where_clause'], l, v)
-                                if not where_clause:
-                                    errors += 1
-                            if country_layer['transformation']:
-                                transformation = validate_transformation(shp, sets['spatial_references']['default_srs'], country_layer['transformation'], l, v)
-                                if not transformation:
-                                    errors += 1
+                        if country_layer["country"] in countries or not len(countries):
+                            log_info("", l, v)
+                            log_info("Country layer %s" % c_layer, l, v)
+                            #print ""
+                            #print "Country layer %s" % c_layer
+                            country_layer = layer['layers'][c_layer]
+                            shp = os.path.join(folder, country_layer['shapefile'])
+                            shp = validate_shapefile(shp, l, v)
+                            if shp:
+                                if country_layer['where_clause']:
+                                    where_clause = validate_where(shp, country_layer['where_clause'], l, v)
+                                    if not where_clause:
+                                        errors += 1
+                                if country_layer['transformation']:
+                                    transformation = validate_transformation(shp, sets['spatial_references']['default_srs'], country_layer['transformation'], l, v)
+                                    if not transformation:
+                                        errors += 1
 
-                            if fc:
-                                fields = validate_fields(shp, fc, country_layer['fields'], l, v)
-                                if not fields:
-                                    errors += 1 #doesn't count all field errors
+                                if fc:
+                                    fields = validate_fields(shp, fc, country_layer['fields'], l, v)
+                                    if not fields:
+                                        errors += 1 #doesn't count all field errors
+                                else:
+                                    log_msg("fields: skipped", "w", l, v)
+                                    #print "[WARNING] fields: skipped"
+                                    warnings += 1
                             else:
+                                log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
+                                log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
                                 log_msg("fields: skipped", "w", l, v)
+                                #print "[WARNING: where clause %s: skipped" % layer['where_clause']
+                                #print "[WARNING: transformation %s: skipped" % layer['transformation']
                                 #print "[WARNING] fields: skipped"
-                                warnings += 1
-                        else:
-                            log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
-                            log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
-                            log_msg("fields: skipped", "w", l, v)
-                            #print "[WARNING: where clause %s: skipped" % layer['where_clause']
-                            #print "[WARNING: transformation %s: skipped" % layer['transformation']
-                            #print "[WARNING] fields: skipped"
-                            errors += 1
-                            warnings += 3
-            else:
-                for c_layer in layer['layers']:
-                    country_layer = layer['layers'][c_layer]
-                    if country_layer["country"] in countries or not len(countries): 
-                        log_msg("country layer %s: skipped" % c_layer, "w", l, v)
-                        #print "[WARNING] country layer %s: skipped" % c_layer
-                        warnings += 1
+                                errors += 1
+                                warnings += 3
+                else:
+                    for c_layer in layer['layers']:
+                        country_layer = layer['layers'][c_layer]
+                        if country_layer["country"] in countries or not len(countries): 
+                            log_msg("country layer %s: skipped" % c_layer, "w", l, v)
+                            #print "[WARNING] country layer %s: skipped" % c_layer
+                            warnings += 1
 
     return errors, warnings
 
@@ -475,15 +477,18 @@ def validate(layers, countries, l=True, v=True):
 
     for layer in layers:
 
-        ini_file = layer + ".ini"
-        
-        e, w = validate_structure(ini_file, "layers", l, v)
-        errors += e
-        warnings += w
+        ini_files = settings.get_layer_ini_files()
+        for ini_file in ini_files:
+            layer_def = settings.get_layers_from_file(os.path.basename(ini_file))
 
-        e, w = validate_layers(ini_file, countries, l, v)
-        errors += e
-        warnings += w
+            if layer in layer_def:
+                e, w = validate_structure(ini_file, "layers", l, v)
+                errors += e
+                warnings += w
+
+                e, w = validate_layer(ini_file, layer, countries, l, v)
+                errors += e
+                warnings += w
 
     print ""
     print ""
