@@ -7,9 +7,14 @@ import validate_ini
 
 
 def main(argv):
+    set = settings.get_settings()
+    print "%s v%s" % (set['tool_info']['name'], set['tool_info']['version'])
 
     layers = []
     countries = []
+    validate = False
+    verbose = True
+    logging = True
     try:
         opts, args = getopt.getopt(argv, "hvl:c:", ["help", "validate", "layers=", "country="])
     except getopt.GetoptError:
@@ -24,31 +29,39 @@ def main(argv):
         #    global _debug
         #    _debug = 1
         if opt in ("-v", "--validate"):
-            validate_ini.validate()
-            input_var = raw_input("Do you want to continue (Y/N): ")
-            if input_var[0].lower() != 'y':
-                sys.exit()
-        elif opt in ("-l", "--layers"):
+            validate = True
+        if opt in ("-nv", "--nonverbose"):
+            verbose = False
+        if opt in ("-nl", "--nolog"):
+            logging = False
+        if opt in ("-l", "--layers"):
             layers.append(arg.lower())
-        elif opt in ("-c", "--country"):
+        if opt in ("-c", "--country"):
             countries.append(arg.upper())
-
+               
     if not len(layers):
         #print len(layers)
-        layers = settings.get_layerlist()
+        layers = settings.get_layer_list()
+        print layers
+
+    if validate:
+        validate_ini.validate(layers, countries, verbose, logging)
+        input_var = raw_input("Do you want to continue (Y/N): ")
+        if input_var[0].lower() != 'y':
+                sys.exit()
 
     merge_layers.merge(list(set(layers)), list(set(countries)))
 
 
 def usage():
-    layers = settings.get_layerlist()
-    set = settings.get_settings()
+    layers = settings.get_layer_list()
 
-    print "%s v%s" % (set['name'], set['version'])
     print "Usage: gfw-sync.py [options]"
     print "Options:"
     print "-h, --help               Show help of GFW Sync Tool"
     print "-v, --validate           Validate all config files before update"
+    print "-nv, --nonverbose        Turn console messages off"
+    print "-nl, --nolog             Turn logging off"
     print "-c <country ISO3 code>   Country to be updated. Update will affect all selected layers."
     print "                         If left out, all countries will be selected."
     print "                         You can use this option multiple times"

@@ -12,9 +12,9 @@ def get_ini_file(folder, ini_f):
     return content
 
 
-
 def get_settings():
     return get_ini_file('config', 'settings.ini')
+
 
 def get_layers_from_file(f):
     return get_ini_file('layers', f)
@@ -37,6 +37,7 @@ def get_layers():
         layers.append(ConfigObj(f))
 
     return layers
+
 
 def get_layer_list():
 
