@@ -111,7 +111,7 @@ def append_description_element(desc, attrib, layer_name, text):
     root = ET.fromstring(desc)
     for element in root.findall("DIV"):
         if not len(element.attrib):
-            desc_element = ET.fromstring("<DIV><H4>%s</H4>%s</DIV>" % (layer_name, text))
+            desc_element = ET.fromstring("<DIV><H3>%s</H3>%s</DIV>" % (layer_name, text))
             desc_element.attrib['ID'] = attrib
             element.append(desc_element)
             break
