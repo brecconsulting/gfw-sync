@@ -59,13 +59,15 @@ def archive_shapefile(shp_path, zip_folder, dst_folder=None, arc_folder=None, lo
     print 'Zip %s' % shp_path
 
     zip_name = zip_shapefile(shp_path, zip_folder, local)
+    src = os.path.join(zip_folder, zip_name)
 
     if dst_folder is not None:
         if not os.path.exists(dst_folder):
             os.mkdir(dst_folder)
-        src = os.path.join(zip_folder, zip_name)
         dst = os.path.join(dst_folder, zip_name)
         print "Copy ZIP to %s" % dst_folder
+        #print src
+        #print dst
         shutil.copy(src, dst)
 
     if arc_folder is not None:
@@ -73,12 +75,15 @@ def archive_shapefile(shp_path, zip_folder, dst_folder=None, arc_folder=None, lo
             os.mkdir(arc_folder)
         ts = time.time()
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
-        src = os.path.join(zip_folder, zip_name)
         dst = os.path.join(arc_folder, "%s_%s.zip" % (os.path.splitext(zip_name)[0], timestamp))
+        #dst = os.path.join(arc_folder, zip_name)
         print "Copy archived ZIP to %s" % arc_folder
+        #print src
+        #print dst
         shutil.copy(src, dst)
 
     #print 'Processing complete.'
+
 
 
 

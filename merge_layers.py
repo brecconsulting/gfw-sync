@@ -76,7 +76,7 @@ def get_all_description_elements(desc):
 def get_description_text(desc):
     root = ET.fromstring(desc)
     for element in root.iter("DIV"):
-        if element.find("P"):
+        if not element.find("P") is None:
             for att in element.attrib:
                 element.attrib.pop(att)
             return ET.tostring(element)[5:-6] 
@@ -200,6 +200,7 @@ def merge(layers, countries):
             print "Layer %s is not defined. Skip" % layer_name
             break
 
+        print ""
         print "Merge %s" % layer_name
         print ""
         print "Define layer parameters"
@@ -233,6 +234,7 @@ def merge(layers, countries):
             layer = layer_def['layers'][l]
             if layer['country'] in countries or not len(countries):
 
+                print ""
                 print "Add %s" % layer['alias']
                 print ""
 
@@ -282,28 +284,27 @@ def merge(layers, countries):
                 #convert empty strings ('') to NULL
                 empty_strings2null(target_fc)
 
-                print "Update country metadata"
+                print "Get country metadata"
 
                 country_meta = metadata.get_metadata_file(local_shp)
                 country_meta_desc = metadata.get_metadata_element_by_etree(country_meta, metadata_keys["ARCGIS"]["description"])
                 country_meta_desc = get_description_text(country_meta_desc)
                 meta_desc = append_description_element(meta_desc, l, layer['alias'], country_meta_desc)            
                 meta_place_keywords = add_country_to_place_keywords(meta_place_keywords, layer['country'])
-
+                
                 print "Import country shapefile"
                 import_shapefile(local_shp, gdb, l)
 
                 print "Achive local country shapefile"
                 archiver.archive_shapefile(local_shp, scratch_workspace, zip_folder, archive_folder, True)
 
-                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
                 print "Transform country shapefile to WGS84 and archive"
+                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
                 arcpy.FeatureClassToShapefile_conversion([local_shp], export_folder)
                 export_shp = os.path.join(export_folder, layer['shapefile'])
-                export_meta = metadata.get_metadata_file(export_shp)
-                export_meta = del_geoprocessing_history(export_meta)
                 archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
 
+        print ""
         print "Update layer metadata"
         meta_tags = update_tags(meta_tags, meta_place_keywords)
         meta_extent_desc = update_extent_desc(meta_place_keywords)
