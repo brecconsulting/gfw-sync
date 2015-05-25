@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 import archiver
 import settings
 import metadata
+import cgi
 
 
 def create_field_map(layer_name, input_field_name, output_field_name):
@@ -39,8 +40,8 @@ def empty_strings2null(fclass):
 
 def get_layer_def(layer_name, layer_defs):
     for layer in layer_defs:
-        if layer == layer_name:
-            return layer_defs[layer]
+        if layer.keys()[0] == layer_name:
+            return layer[layer_name]
     return False
 
 
@@ -74,10 +75,11 @@ def get_all_description_elements(desc):
 
 def get_description_text(desc):
     root = ET.fromstring(desc)
-    for parent in root.findall("DIV"):
-        for element in parent.findall("DIV"):
-            if element.find("P"):
-                return ET.tostring(element)[5:-6]
+    for element in root.iter("DIV"):
+        if element.find("P"):
+            for att in element.attrib:
+                element.attrib.pop(att)
+            return ET.tostring(element)[5:-6] 
 
 
 def remove_description_element(desc, desc_attrib):
@@ -86,7 +88,7 @@ def remove_description_element(desc, desc_attrib):
         for element in parent.findall("DIV"):
             if "ID" in element.attrib:
                 if element.attrib["ID"] == desc_attrib:
-                    print ET.tostring(element)
+                    #print ET.tostring(element)
                     parent.remove(element)
     desc = ET.tostring(root)
     return desc
@@ -105,16 +107,16 @@ def remove_countries_from_description(desc, countries, layer_def):
     return desc
 
 
-def append_description_element(desc, attrib, text):
+def append_description_element(desc, attrib, layer_name, text):
     root = ET.fromstring(desc)
     for element in root.findall("DIV"):
         if not len(element.attrib):
-            desc_element = ET.SubElement(element, "DIV")
+            desc_element = ET.fromstring("<DIV><H4>%s</H4>%s</DIV>" % (layer_name, text))
             desc_element.attrib['ID'] = attrib
-            desc_element.text = text
+            element.append(desc_element)
             break
     desc = ET.tostring(root)
-    print desc
+    return desc
 
 
 def remove_countries_from_place_keywords(keywords, countries):
@@ -157,6 +159,21 @@ def import_shapefile(shp, gdb, fc):
     arcpy.FeatureClassToFeatureClass_conversion(shp, gdb, fc)
 
 
+def clear_workspace(folder):
+    files = glob.glob(os.path.join(folder, "*.*"))
+    for f in files:
+        try:
+            os.remove(f)
+        except:
+            pass
+
+
+def del_geoprocessing_history(meta):
+    metadata_keys = settings.get_metadata_keys()
+    metadata.remove_metadata_elements_by_etree(meta, metadata_keys["ARCGIS"]["geoprocessing_history"])
+    return metadata
+
+
 def merge(layers, countries):
 
     sets = settings.get_settings()
@@ -164,20 +181,28 @@ def merge(layers, countries):
 
     workspace = sets['paths']['workspace']
     scratch_workspace = sets['paths']['scratch_workspace']
+    export_folder = os.path.join(scratch_workspace, "export")
+    if not os.path.exists(export_folder):
+        os.mkdir(export_folder)
 
     default_srs = sets['spatial_references']['default_srs']
     gdb_srs = sets['spatial_references']['gdb_srs']
 
     arcpy.env.overwriteOutput = True
+    clear_workspace(scratch_workspace)
+    clear_workspace(export_folder)
 
     for layer_name in layers:
 
         layer_def = get_layer_def(layer_name, layer_defs)
 
         if not layer_def:
-            print "Layer %s does is not defined. Skip" % layer_name
+            print "Layer %s is not defined. Skip" % layer_name
             break
 
+        print "Merge %s" % layer_name
+        print ""
+        print "Define layer parameters"
         gdb = os.path.join(workspace, layer_def['gdb'])
         arcpy.env.workspace = gdb
         drive = sets['bucket_drives'][layer_def['bucket']]
@@ -185,19 +210,22 @@ def merge(layers, countries):
         zip_folder = os.path.join(layer_folder, sets['folders']['zip_folder'])
         archive_folder = os.path.join(layer_folder, sets['folders']['archive_folder'])
 
-        target_fc = layer_name
+        target_fc = os.path.join(gdb,layer_name)
         target_shp = os.path.join(layer_folder, layer_def['shapefile'])
 
+        print "Get metadata"
         metadata_keys = settings.get_metadata_keys()
         meta = metadata.get_metadata_file(target_fc)
 
         meta_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["description"])
         meta_extent_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["extent_description"])
         meta_tags = layer_def["keywords"]
-        meta_place_keywords = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["place_keywords"])
+        meta_place_keywords = metadata.get_metadata_elements_by_etree(meta, metadata_keys["ARCGIS"]["place_keywords"])
 
-
+        print "Remove country features"
         remove_features(target_fc, countries)
+
+        print "Remove country metadata"
         meta_desc = remove_countries_from_description(meta_desc, countries, layer_def)
         meta_place_keywords = remove_countries_from_place_keywords(meta_place_keywords, countries)
 
@@ -206,16 +234,25 @@ def merge(layers, countries):
             if layer['country'] in countries or not len(countries):
 
                 print "Add %s" % layer['alias']
+                print ""
 
-                arcpy.env.outputCoordinateSystem = gdb_srs
+                print "Make local copy"
+
+                input_shp = os.path.join(layer_folder, layer['shapefile'])
+                local_shp = os.path.join(scratch_workspace, layer['shapefile'])
+                arcpy.Copy_management(input_shp, local_shp)
+                local_meta = metadata.get_metadata_file(local_shp)
+                local_meta = del_geoprocessing_history(local_meta)
+                
+                arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(gdb_srs)
 
                 if layer['transformation']:
                     arcpy.env.geographicTransformations = layer['transformation']
 
-                input_fc = os.path.join(layer_folder, layer['shapefile'])
+                
                 input_layer = "input_layer"
 
-                arcpy.MakeFeatureLayer_management(input_fc, input_layer, layer['where_clause'], "", "")
+                arcpy.MakeFeatureLayer_management(local_shp, input_layer, layer['where_clause'], "", "")
 
                 fms = arcpy.FieldMappings()
 
@@ -243,26 +280,31 @@ def merge(layers, countries):
                 arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
 
                 #convert empty strings ('') to NULL
-                empty_strings2null(input_fc)
+                empty_strings2null(target_fc)
 
-                country_meta = metadata.get_metadata_file(input_fc)
+                print "Update country metadata"
+
+                country_meta = metadata.get_metadata_file(local_shp)
                 country_meta_desc = metadata.get_metadata_element_by_etree(country_meta, metadata_keys["ARCGIS"]["description"])
                 country_meta_desc = get_description_text(country_meta_desc)
-
-                meta_desc = append_description_element(meta_desc, l, country_meta_desc)
+                meta_desc = append_description_element(meta_desc, l, layer['alias'], country_meta_desc)            
                 meta_place_keywords = add_country_to_place_keywords(meta_place_keywords, layer['country'])
 
-                import_shapefile(input_fc, gdb, l)
+                print "Import country shapefile"
+                import_shapefile(local_shp, gdb, l)
 
-                #archive local shapefile
-                archiver.archive_shapefile(input_fc, scratch_workspace, zip_folder, archive_folder, True)
+                print "Achive local country shapefile"
+                archiver.archive_shapefile(local_shp, scratch_workspace, zip_folder, archive_folder, True)
 
                 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
-                # Export FeatureClass to Shapefile
-                arcpy.FeatureClassToShapefile_conversion([input_fc], scratch_workspace)
-                export_shp = os.path.join(scratch_workspace, layer['shapefile'])
+                print "Transform country shapefile to WGS84 and archive"
+                arcpy.FeatureClassToShapefile_conversion([local_shp], export_folder)
+                export_shp = os.path.join(export_folder, layer['shapefile'])
+                export_meta = metadata.get_metadata_file(export_shp)
+                export_meta = del_geoprocessing_history(export_meta)
                 archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
 
+        print "Update layer metadata"
         meta_tags = update_tags(meta_tags, meta_place_keywords)
         meta_extent_desc = update_extent_desc(meta_place_keywords)
 
@@ -276,15 +318,25 @@ def merge(layers, countries):
 
         arcpy.env.geographicTransformations = ""
 
-        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
-        arcpy.FeatureClassToShapefile_conversion(target_fc, layer_folder, layer_def['shapefile'])
-        archiver.archive_shapefile(target_shp, scratch_workspace, zip_folder, archive_folder, False)
-
+        print "Archive layer"
         arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(gdb_srs)
-        arcpy.FeatureClassToShapefile_conversion(target_fc, scratch_workspace, layer_def['shapefile'])
+        arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_workspace)
         export_shp = os.path.join(scratch_workspace, layer_def['shapefile'])
+        export_meta = metadata.get_metadata_file(export_shp)
+        export_meta = del_geoprocessing_history(export_meta)
         archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, True)
 
-        files = glob.glob(os.path.join(scratch_workspace, "*.*"))
-        for f in files:
-            os.remove(f)
+        print "Transform layer to WGS84 and archive"
+        arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
+        arcpy.FeatureClassToShapefile_conversion([target_fc], export_folder)
+        export_shp = os.path.join(export_folder, layer_def['shapefile'])
+        export_meta = metadata.get_metadata_file(export_shp)
+        export_meta = del_geoprocessing_history(export_meta)
+        archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
+
+        print "Copy shapefile to S3"
+        target_shp = os.path.join(layer_folder, layer_def['shapefile'])
+        arcpy.Copy_management(export_shp, target_shp)
+
+        #print "Remove temporay files"
+        #clear_scratch_workspace()

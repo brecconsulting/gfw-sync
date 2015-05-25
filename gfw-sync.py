@@ -9,6 +9,7 @@ import validate_ini
 def main(argv):
     set = settings.get_settings()
     print "%s v%s" % (set['tool_info']['name'], set['tool_info']['version'])
+    print ""
 
     layers = []
     countries = []
@@ -50,7 +51,7 @@ def main(argv):
         if input_var[0].lower() != 'y':
                 sys.exit()
 
-    merge_layers.merge(list(set(layers)), list(set(countries)))
+    merge_layers.merge(layers, countries)
 
 
 def usage():

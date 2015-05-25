@@ -63,7 +63,7 @@ def get_metadata_elements_by_key(metadata, e):
     elements = []
 
     for element in root.iter(e):
-        elements.append(element.text)
+        elements.append(element.text.encode('ascii', 'replace'))
 
     return elements
 
@@ -78,7 +78,7 @@ def get_metadata_element_by_etree(metadata, e_tree):
         i += 1
         d[i] = d[i-1].find(e)
         if i == len(e_tree):
-            return d[i].text
+            return d[i].text.encode('ascii', 'replace')
 
 def get_metadata_elements_by_etree(metadata, e_tree):
     elements = []
@@ -94,8 +94,27 @@ def get_metadata_elements_by_etree(metadata, e_tree):
             d[i] = d[i] + p.findall(e)
         for j in range(len(d[i])):
             if i == len(e_tree):
-                elements.append(d[i][j].text)
+                elements.append(d[i][j].text.encode('ascii', 'replace'))
     return elements
+
+
+def remove_metadata_elements_by_etree(metadata, e_tree):
+    d = {}
+    tree = ET.parse(metadata)
+    root = tree.getroot()
+    i = 0
+    d[i] = [root]
+    for e in e_tree:
+        i += 1
+        d[i] = []
+        for p in d[i-1]:
+            d[i] = d[i] + p.findall(e)
+        if i == len(e_tree):
+            for j in range(len(d[i])):
+                p.remove(d[i][j])
+    tree.write(metadata)
+    return metadata
+
 
 
 def update_metadata_element(metadata, e_tree, e_text):
@@ -108,7 +127,7 @@ def update_metadata_element(metadata, e_tree, e_text):
         i += 1
         d[i] = d[i-1].find(e)
         if i == len(e_tree):
-            d[i].text = cgi.escape(e_text)
+            d[i].text = e_text #cgi.escape(e_text)
     tree.write(metadata)
     return metadata
 
