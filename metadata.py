@@ -49,7 +49,7 @@ def get_metadata_file(fc):
             temp_folder = sets['paths']['scratch_workspace']
         else:
             temp_folder = arcpy.env.scratchFolder
-        out_file = os.path.join(temp_folder, fc + ".xml")
+        out_file = os.path.join(temp_folder, os.path.basename(fc) + ".xml")
         copy_metadata(fc, out_file)
         return out_file
 
@@ -63,8 +63,10 @@ def get_metadata_elements_by_key(metadata, e):
     elements = []
 
     for element in root.iter(e):
-        elements.append(element.text.encode('ascii', 'replace'))
-
+		try:
+			elements.append(element.text.encode('ascii', 'replace'))
+		except AttributeError:
+			pass
     return elements
 
 
@@ -78,7 +80,11 @@ def get_metadata_element_by_etree(metadata, e_tree):
         i += 1
         d[i] = d[i-1].find(e)
         if i == len(e_tree):
-            return d[i].text.encode('ascii', 'replace')
+			try:
+				text = d[i].text.encode('ascii', 'replace')
+			except AttributeError:
+				text = ""
+			return text
 
 def get_metadata_elements_by_etree(metadata, e_tree):
     elements = []
@@ -94,7 +100,10 @@ def get_metadata_elements_by_etree(metadata, e_tree):
             d[i] = d[i] + p.findall(e)
         for j in range(len(d[i])):
             if i == len(e_tree):
-                elements.append(d[i][j].text.encode('ascii', 'replace'))
+				try:
+					elements.append(d[i][j].text.encode('ascii', 'replace'))
+				except AttributeError:
+					pass
     return elements
 
 
@@ -127,7 +136,12 @@ def update_metadata_element(metadata, e_tree, e_text):
         i += 1
         d[i] = d[i-1].find(e)
         if i == len(e_tree):
-            d[i].text = e_text #cgi.escape(e_text)
+			try:
+				d[i].text = e_text #cgi.escape(e_text)
+			except AttributeError:
+				child = ET.Element(e)
+				child.text = e_text
+				d[i-1].append(child)
     tree.write(metadata)
     return metadata
 
