@@ -309,7 +309,7 @@ def merge(layers, countries):
                 export_shp = os.path.join(export_folder, layer['shapefile'])
                 archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
 
-                print "Copy local file to S3"
+                print "Copy country shapefile to S3"
                 arcpy.Copy_management(local_shp, input_shp)
 
         print ""
