@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 import archiver
 import settings
 import metadata
-import cgi
+import import_layers
 
 
 def create_field_map(layer_name, input_field_name, output_field_name):
@@ -245,6 +245,8 @@ def merge(layers, countries):
                 arcpy.Copy_management(input_shp, local_shp)
                 local_meta = metadata.get_metadata_file(local_shp)
                 local_meta = del_geoprocessing_history(local_meta)
+
+                import_layers.add_gfwid(local_shp)
                 
                 arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(gdb_srs)
 
@@ -262,6 +264,9 @@ def merge(layers, countries):
                     if layer['fields'][field]:
                         if layer['fields'][field][0] == 'field':
                             fms.addFieldMap(create_field_map(input_layer, layer['fields'][field][1], field))
+
+                #Make sure the gfwid is mapped as well
+                fms.addFieldMap(create_field_map(input_layer, "gfwid", "gfwid"))
 
                 # append layers to target feature class
                 arcpy.Append_management(input_layer, target_fc, "NO_TEST", fms, "")
@@ -303,6 +308,9 @@ def merge(layers, countries):
                 arcpy.FeatureClassToShapefile_conversion([local_shp], export_folder)
                 export_shp = os.path.join(export_folder, layer['shapefile'])
                 archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
+
+                print "Copy local file to S3"
+                arcpy.Copy_management(local_shp, input_shp)
 
         print ""
         print "Update layer metadata"
