@@ -74,13 +74,18 @@ def get_all_description_elements(desc):
 
 
 def get_description_text(desc):
-    root = ET.fromstring(desc)
-    for element in root.iter("DIV"):
-        if not element.find("P") is None:
-            for att in element.attrib:
-                element.attrib.pop(att)
-            return ET.tostring(element)[5:-6] 
-
+    try:
+        root = ET.fromstring(desc)
+        for element in root.iter("DIV"):
+            if not element.find("P") is None:
+                attributs = []
+                for att in element.attrib:
+                    attributs.append(att)
+                for att in attributs:
+                    element.attrib.pop(att)
+                return ET.tostring(element)[5:-6] 
+    except ET.ParseError:
+        return ""
 
 def remove_description_element(desc, desc_attrib):
     root = ET.fromstring(desc)
