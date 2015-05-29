@@ -354,3 +354,4 @@ def merge(layers, countries):
 
         #print "Remove temporay files"
         #clear_scratch_workspace()
+

@@ -2,17 +2,15 @@ from urllib2 import urlopen
 import os
 import sys
 import datetime
-
-from bs4 import BeautifulSoup
-import requests
-
 import zipfile
-
-import arcpy
-import merge_layers
-import archiver
 import shutil
 
+from bs4 import BeautifulSoup  # pip install beuatifulsoup4
+import requests  # pip install requests
+import arcpy  # comes with ArcGIS
+
+import merge_layers  # local module
+import archiver  # local module
 
 def get_soup(url):
     """Make BeautifulSoup object from a url."""
@@ -155,18 +153,17 @@ def append_to_imazon_sad(input_shp, target_fc):
     arcpy.CalculateField_management(target_layer, "orig_fname", "'%s'" % fname, "PYTHON", "")
 
     
-
-
-
-
 def update_imazon_sad():
-    sad_folder = r"C:\Users\asa.strong\Documents\Global Forest Watch\Data Management\Data Updates\Imazon SAD\download"
+    sad_folder = r"F:\forest_change\imazon_sad"
     url = 'http://www.imazongeo.org.br/doc/downloads.php'
-    scratch_folder = r"C:\Users\asa.strong\Documents\Global Forest Watch\Data Management\Data Updates\Imazon SAD\temp"
-    gdb = r"C:\Users\asa.strong\Documents\Global Forest Watch\Data Management\Data Updates\Imazon SAD\forest_change.gdb"
+    scratch_folder = r"D:\GIS Data\GFW\temp"
+    gdb = r"D:\GIS Data\GFW\forest_change.gdb"
     fc = "imazon_sad"
     default_srs = "WGS 1984"
     gdb_srs = 'WGS 1984 Web Mercator (auxiliary sphere)'
+    zip_folder = os.path.join(sad_folder, 'zip')
+    arc_folder = os.path.join(sad_folder, 'archive')
+    export_folder = os.path.join(scratch_folder, "export")
 
     arcpy.env.overwriteOutput = True
 
@@ -174,7 +171,7 @@ def update_imazon_sad():
 
     print "Clear workspace"
     merge_layers.clear_workspace(scratch_folder)
-        
+    merge_layers.clear_workspace(export_folder)    
 
     print "Mirror files"
     zipfiles = mirror_sad_files(url, sad_folder)
@@ -197,18 +194,18 @@ def update_imazon_sad():
     print "repair geometries"
     arcpy.RepairGeometry_management(target_fc, "DELETE_NULL")
 
-    export_folder = os.path.join(scratch_folder, "export")
-    arcpy.FeatureClassToShapefile_conversion([target_fc], export_folder)
-
-    export_shp =  os.path.join(export_folder,fc + ".shp")
-
-    archiver.archive_shapefile(export_shp, scratch_folder, local=True)
-
-    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
-
+    print "Export to Shapefile"
     arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
+    export_shp =  os.path.join(scratch_folder, fc + ".shp")
+    archiver.archive_shapefile(export_shp, scratch_folder, zip_folder, arc_folder, local=True)
+    
+    print "Convert to WGS84 and export to Shapefile"
+    arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(default_srs)
+    arcpy.FeatureClassToShapefile_conversion([target_fc], export_folder)
+    export_shp =  os.path.join(export_folder,fc + ".shp")
+    archiver.archive_shapefile(export_shp, scratch_folder, zip_folder, arc_folder, local=False)
 
-    archiver.archive_shapefile(export_shp, scratch_folder, local=False)
 
+if __name__ == "__main__":
 
-update_imazon_sad()
+    update_imazon_sad()
