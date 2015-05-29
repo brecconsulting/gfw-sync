@@ -4,6 +4,7 @@ import sys
 import datetime
 import zipfile
 import shutil
+import logging
 
 from bs4 import BeautifulSoup  # pip install beuatifulsoup4
 import requests  # pip install requests
@@ -154,6 +155,20 @@ def append_to_imazon_sad(input_shp, target_fc):
 
     
 def update_imazon_sad():
+    
+    ts = time.time()
+    timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
+
+    abspath = os.path.abspath(__file__)
+    dir_name = os.path.dirname(abspath)
+    log_folder = os.path.join(dir_name, "log")
+    if not os.path.exists(log_folder):
+        os.mkdir(log_folder)
+    log_name = os.path.join(log_folder, "imazon_sad_%s.log" % timestamp)
+    logging.basicConfig(filename=log_name,level=logging.INFO)
+
+    logging.info("Start application")
+    
     sad_folder = r"F:\forest_change\imazon_sad"
     url = 'http://www.imazongeo.org.br/doc/downloads.php'
     scratch_folder = r"D:\GIS Data\GFW\temp"
@@ -176,9 +191,11 @@ def update_imazon_sad():
     print "Mirror files"
     zipfiles = mirror_sad_files(url, sad_folder)
 
+
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(gdb_srs)
 
     for zf in zipfiles:
+        logging.info("Append %s" %zf)
         bname = os.path.basename(zf)
         fpath = os.path.join(scratch_folder, bname)
         shutil.copy(zf, fpath)
@@ -191,8 +208,9 @@ def update_imazon_sad():
         
         append_to_imazon_sad(shp_path,target_fc)
 
-    print "repair geometries"
-    arcpy.RepairGeometry_management(target_fc, "DELETE_NULL")
+    if len(zipfiles):
+        print "repair geometries"
+        arcpy.RepairGeometry_management(target_fc, "DELETE_NULL")
 
     print "Export to Shapefile"
     arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
@@ -205,6 +223,7 @@ def update_imazon_sad():
     export_shp =  os.path.join(export_folder,fc + ".shp")
     archiver.archive_shapefile(export_shp, scratch_folder, zip_folder, arc_folder, local=False)
 
+    logging.info("Done")
 
 if __name__ == "__main__":
 
