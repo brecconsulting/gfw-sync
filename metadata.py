@@ -13,7 +13,7 @@ def get_datatype(fc):
 
 def copy_metadata(fc, output):
     # installDir = arcpy.GetInstallInfo("desktop")["InstallDir"]
-	installDir = r"C:\Program Files (x86)\ArcGIS\Desktop10.3"
+    installDir = r"C:\Program Files (x86)\ArcGIS\Desktop10.3"
     xslt = os.path.join(installDir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
     arcpy.XSLTransform_conversion(fc, xslt, output)
 
