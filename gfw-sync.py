@@ -31,9 +31,9 @@ def main(argv):
         #    _debug = 1
         if opt in ("-v", "--validate"):
             validate = True
-        if opt in ("-nv", "--nonverbose"):
+        if opt in ("-n", "--nonverbose"):
             verbose = False
-        if opt in ("-nl", "--nolog"):
+        if opt in ("-g", "--nolog"):
             logging = False
         if opt in ("-l", "--layers"):
             layers.append(arg.lower())
@@ -61,8 +61,8 @@ def usage():
     print "Options:"
     print "-h, --help               Show help of GFW Sync Tool"
     print "-v, --validate           Validate all config files before update"
-    print "-nv, --nonverbose        Turn console messages off"
-    print "-nl, --nolog             Turn logging off"
+    print "-n, --nonverbose        Turn console messages off"
+    print "-g, --nolog             Turn logging off"
     print "-c <country ISO3 code>   Country to be updated. Update will affect all selected layers."
     print "                         If left out, all countries will be selected."
     print "                         You can use this option multiple times"
