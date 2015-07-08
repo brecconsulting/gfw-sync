@@ -5,11 +5,12 @@ Synchronization stuff for easier management of GFW data
 
 ### Dependencies
 
-arcpy
+arcpy (comes with ArcGIS)
+configobj # pip install configobj
+BeautifulSoup  # pip install beuatifulsoup4
+requests  # pip install requests
 
-configobj
-
-CloudBerry Drive
+CloudBerry Drive (or similar tool to map S3 buckets as Windows drives)
 
 ### Usage
 
