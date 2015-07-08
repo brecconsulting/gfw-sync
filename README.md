@@ -5,11 +5,11 @@ Synchronization stuff for easier management of GFW data
 
 ### Dependencies
 
-arcpy (comes with ArcGIS)
+arcpy (ships with ArcGIS)
 
 configobj # pip install configobj
 
-BeautifulSoup  # pip install beuatifulsoup4
+BeautifulSoup  # pip install beautifulsoup4
 
 requests  # pip install requests
 
