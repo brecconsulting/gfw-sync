@@ -18,5 +18,3 @@ def add_gfwid(shp):
         for row in cur:
             row.setValue(field_name, str(uuid.uuid4()))
             cur.updateRow(row)
-
-

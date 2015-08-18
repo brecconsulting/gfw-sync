@@ -119,7 +119,7 @@ def validate_gdb(gdb, l=True, v=True):
 
     if arcpy.Exists(gdb):
         desc = arcpy.Describe(gdb)
-        if not desc.workspaceFactoryProgID == 'esriDataSourcesGDB.FileGDBWorkspaceFactory':
+        if not desc.workspaceFactoryProgID == 'esriDataSourcesGDB.FileGDBWorkspaceFactory.1':
             log_msg("gdb %s: is not a fileGDB" % gdb, "e", l, v)
             #print "[FAILED] gdb %s: is not a fileGDB" % gdb
             return False
