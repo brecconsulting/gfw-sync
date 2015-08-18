@@ -19,7 +19,7 @@ def download_wdpa():
     sets = settings.get_settings()
 
     url = "http://wcmc.io/wdpa_current_release"  # pull out
-    path = sets["path"]["scratch_workspace"]
+    path = sets["paths"]["scratch_workspace"]
 
     zip_name = "wdpa_current_release.zip"
     zip_path = os.path.join(path, zip_name)
@@ -132,4 +132,4 @@ def remove_features(in_feature_class, out_feature_class):
     arcpy.DeleteFeatures_management("out_layer")
 
 
-
+download_wdpa()
