@@ -1,4 +1,3 @@
-
 import urllib2
 import urllib
 import json
@@ -6,42 +5,68 @@ import time
 
 """from FG: https://github.com/fgassert/agol_util"""
 
-
 OD_GROUP_IDS = {
-    "managed forests": "460c7c785daf40cf9a776d251792bef1",
+    "managed_forests": "460c7c785daf40cf9a776d251792bef1",
     "mining": "7a741c91c1254468ba647792dabc3057",
-    "oil palm": "7efb7a9499ef4138a997a4b5db36d04d",
-    "resource rights": "fa6a7bf23f7d45d3a9f97b48fac15e85",
-    "Wood Fiber Plantations": "be04478fe3414371ab61c8063d30e770",
-    "Conservation": "9b895183c97d420995b87ef714d20f50",
-    "Forest cover": "577b964b7d8b41b9822d39a7be261bff",
-    "Land Rights": "30958b493339437f835d49660b0d92de"
+    "oil_palm": "7efb7a9499ef4138a997a4b5db36d04d",
+    "resource_rights": "fa6a7bf23f7d45d3a9f97b48fac15e85",
+    "Wood_fiber_plantations": "be04478fe3414371ab61c8063d30e770",
+    "conservation": "9b895183c97d420995b87ef714d20f50",
+    "forest_cover": "577b964b7d8b41b9822d39a7be261bff",
+    "land_rights": "30958b493339437f835d49660b0d92de"
 }
-
 
 AGOL_BASE_URL = "http://gfw.maps.arcgis.com/home/group.html?id=%s"
 
-def test_this_shit():
-    # Create an instance of AGOL
-    # 
-    res = agol.add_shapefile_from_url('http://data.wri.org/Aqueduct/aqueduct_global_dl_shp2.zip')
+def publish(agol, url):
+    """Publishes the shapefile at url to AGOL. Returns the result of the
+    post request.
 
+    """
+    res = agol.add_shapefile_from_url(url)
+    itemId = res['id']
+    agol.wait_for_completion(itemId)
+
+    #publish shapefile to AGOL as a feature service
+    return agol.publish_shapefile(itemId)
+
+def group_id(group_name):
+    try:
+        return OD_GROUP_IDS[group_name]
+    except KeyError, e:
+        raise Exception("Busted key: %s" % group_name)
+
+def share(agol, service_response, group_name):
+    serviceId = service_response['services'][0]['serviceItemId']
+    groupId = group_id(group_name)
+    return agol.share_items(serviceId, everyone='true', groups=groupId)
+
+def test_workflow(url, group_name):
+    # Create an instance of AGOL;
+    # copy shapefile from external url to agol
+    # agol.wait_for_completion(itemId)
+    # share feature service publicly and add to Open Data grou
+    agol = AGOL_util('https://gfw.maps.arcgis.com/sharing/rest',
+                     'GlobalForestWatch',
+                     '1408henry')
+    pub_result = publish(agol, url)
+    share(agol, pub_result)
 
 class AGOL_util:
     """
     Minimal client library for ArcGIS online API
-    
+
     Parameters:
     root_url: portal root rest url e.g. http://myorg.arcgis.com/sharing/rest
     username: valid arggis online username
     password: valid arggis online password
     """
-    
+
     def __init__(self, root_url, username, password):
         self.url = root_url
         self._check_items = []
         self._uid = username
-        self._pwdd = password
+        self._pwd = password
         self._validate_user(username, password)
 
     def _validate_user(self, username, password):
@@ -63,10 +88,10 @@ class AGOL_util:
             self._token = ''
             self._expiry = 0
         return resp
-        
+
     def get_token(self, nd=False):
-        """ 
-        returns valid token or false on failure 
+        """
+        returns valid token or false on failure
         """
         if self._token=='' or self._expiry <= time.time():
             if nd:
@@ -75,7 +100,7 @@ class AGOL_util:
                 self._validate_user(self._uid, self._pwd)
                 return(self.get_token(1))
         return self._token
-    
+
     def query(self, endpoint, options):
         '''
         POST to url endpoint with options as data
@@ -90,25 +115,26 @@ class AGOL_util:
         requrl = "{}{}".format(self.url, endpoint)
         req = urllib2.Request(requrl, data)
         return json.load(urllib2.urlopen(req))
-    
+
     def add_item_from_url(self, url, options={}):
         options['dataUrl'] = url
         options['async'] = 'true'
         options['overwrite'] = 'true'
         return self.query('/content/users/{}/addItem'.format(self._uid), options)
+
     def add_shapefile_from_url(self, url, options={}):
         """ URL should point to zipped shapefile """
         options['type'] = 'Shapefile'
         return self.add_item_from_url(url, options)
-    
+
     def get_item_status(self, itemId):
         url = '/content/users/{}/items/{}/status'.format(self._uid, itemId)
         return self.query(url, {})
 
     def wait_for_completion(self, itemId, timeout=60):
-        ''' 
+        '''
         Check every second for item status to return completed
-        
+
         Return:
         true on completion
         false on timeout or error
@@ -122,7 +148,7 @@ class AGOL_util:
             time.sleep(1)
             res = self.get_item_status(itemId)
         return False
-    
+
     def update_item(self, itemId, options):
         url = '/content/users/{}/items/{}/update'.format(self._uid, itemId)
         return self.query(url, options)
@@ -146,6 +172,7 @@ class AGOL_util:
         options['publishParameters'] = json.dumps(publishParameters)
         options['overwrite'] = 'true'
         return self.query('/content/users/{}/publish'.format(self._uid), options)
+
     def publish_shapefile(self, itemId, options={}, publishParameters={}):
         options['fileType'] = 'shapefile'
         if 'name' not in publishParameters:
