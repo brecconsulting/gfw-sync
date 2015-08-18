@@ -6,7 +6,6 @@
 # Description: 
 # ---------------------------------------------------------------------------
 
-
 import os
 import glob
 import arcpy
@@ -60,7 +59,7 @@ def remove_features(fc, countries):
             arcpy.DeleteFeatures_management("layer")
 
     # Compact target file-geodatabase to avoid running out of ObjectIDs
-    arcpy.Compact_management(arcpy.env.workspace)
+    arcpy.Compress_management(arcpy.env.workspace)
 
 
 def get_all_description_elements(desc):
@@ -210,7 +209,8 @@ def merge(layers, countries):
         print ""
         print "Define layer parameters"
         gdb = os.path.join(workspace, layer_def['gdb'])
-        arcpy.env.workspace = gdb
+        gdb_su = os.path.join(workspace, layer_def['gdb_su'])
+        arcpy.env.workspace = gdb_su
         drive = sets['bucket_drives'][layer_def['bucket']]
         layer_folder = os.path.join(drive, layer_def['folder'])
         zip_folder = os.path.join(layer_folder, sets['folders']['zip_folder'])
@@ -222,7 +222,7 @@ def merge(layers, countries):
         print "Get metadata"
         metadata_keys = settings.get_metadata_keys()
         meta = metadata.get_metadata_file(target_fc)
-
+		
         meta_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["description"])
         meta_extent_desc = metadata.get_metadata_element_by_etree(meta, metadata_keys["ARCGIS"]["extent_description"])
         meta_tags = layer_def["keywords"]
