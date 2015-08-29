@@ -14,52 +14,68 @@ def unzip(source_filename, dest_dir):
         zf.extractall(dest_dir)
 
 
-def download_wdpa():
+def download_wdpa(url, wdpa, path):
 
-    sets = settings.get_settings()
+	sets = settings.get_settings()
 
-    url = "http://wcmc.io/wdpa_current_release"  # pull out
-    path = sets["paths"]["scratch_workspace"]
+	zip_name = "%s.zip" % wdpa
+	zip_path = os.path.join(path, zip_name)
+	gdb = os.path.join(path, "%s.gdb")
+	if arcpy.Exists(gdb):
+		arcpy.Delete_management(gdb)
+ 
+	urllib.urlretrieve(url, zip_path)
 
-    zip_name = "wdpa_current_release.zip"
-    zip_path = os.path.join(path, zip_name)
-    path_gdb = os.path.join(path, "wdpa_current_release.gdb")
-    temp_folder = os.path.join(path, "temp")
+	unzip(zip_path, path)
+	os.remove(zip_path)
+	
+	return path
+	
 
-
-    try:
-        shutil.rmtree(path_gdb)
-    except:
-        pass
-
-    urllib.urlretrieve(url, zip_path)
-
-    unzip(zip_path, temp_folder)
-
-    path_gdb = os.path.join(path, "wdpa_current_release.gdb")
-
-    sub_folders = [x[0] for x in os.walk(temp_folder)]
-
-
-    for f in sub_folders:
-        if re.findall("\W+WDPA\w+\.gdb", f):
-            shutil.move(f, path_gdb)
-            break
-
-    os.remove(zip_path)
-    shutil.rmtree(temp_folder)
-
-    arcpy.env.workspace = path_gdb
+def replace_wdpa_data(src_gdb, dst_gdb, wdpa_fc, sde_gdb):
+	
+    arcpy.env.workspace = src_gdb
     fc_list = arcpy.ListFeatureClasses()
 
     for fc in fc_list:
-        desc = arcpy.Describe(fc)
-        if desc.shapeType == 'Polygon':
-            arcpy.Rename_management(fc, 'wdpa_poly', "FeatureClass")
-        elif desc.shapeType == 'Point' or desc.shapeType == 'Multipoint':
-            arcpy.Rename_management(fc, 'wdpa_point', "FeatureClass")
+		print fc
+		desc = arcpy.Describe(fc)
+		if desc.shapeType == 'Polygon':
+			##delete all features
+			
+			src_fc = os.path.join(src_gdb, fc)
+			dst_fc = os.path.join(dst_gdb, wdpa_fc)
+
+			arcpy.DeleteFeatures_management(dst_fc)
+			arcpy.Compress_management(sde_gdb)
+
+			
+			##load new data
+			arcpy.Append_management (src_fc, dst_fc, "NO_TEST")
+			
 
 
+
+sets = settings.get_settings()			
+			
+url = "http://wcmc.io/wdpa_current_release"
+wdpa = "wdpa_current_release"
+path = sets["paths"]["scratch_workspace"]			
+			
+print "download"
+src_gdb = os.path.join(path,"%s.gdb" % wdpa) #download_wdpa(url, wdpa, path)
+dst_gdb = r"D:\scripts\connections\test (gfw).sde\conservation"
+sde_gdb = r"D:\scripts\connections\test (sde).sde"
+
+wdpa_fc = "wdpa_protected_areas"
+
+print "upload data"
+replace_wdpa_data(src_gdb, dst_gdb, wdpa_fc, sde_gdb)
+			
+			
+			
+########## old / kick out
+			
 def get_wdpaid_row(in_feature_class, id, fields):
     sets = settings.get_settings()
 
@@ -132,4 +148,4 @@ def remove_features(in_feature_class, out_feature_class):
     arcpy.DeleteFeatures_management("out_layer")
 
 
-download_wdpa()
+
