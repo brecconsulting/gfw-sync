@@ -38,7 +38,7 @@ def zip_shapefile(shp, dst, local):
         zip_name = base_fname + ".zip"
 
     zip_path = os.path.join(dst, zip_name)
-    zf = zipfile.ZipFile(zip_path, 'w', allowZip64=False)
+    zf = zipfile.ZipFile(zip_path, 'w', allowZip64=True)
 
     search = os.path.join(basepath, "*.*")
     files = glob.glob(search)
