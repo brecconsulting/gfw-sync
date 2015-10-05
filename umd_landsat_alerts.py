@@ -56,7 +56,14 @@ field_name = "date"
 field_type = "TEXT"
 arcpy.AddField_management(merged_file, field_name, field_type)
 
-#Calculate dates 
-
+#Calculate date from julian dates "GRID_CODE"
+expression = convert_julian(!GRID_CODE!)
+code_block = """"
+def convert_julian(date):
+	d = datetime.datetime.strptime(date, '%j')
+	d.strftime("%Y/%m/%d")
+	dnew = d.replace(year = 2015)
+	return dnew """
+arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3", code_block)
 	
 
