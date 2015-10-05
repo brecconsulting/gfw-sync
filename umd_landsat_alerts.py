@@ -47,23 +47,64 @@ r"D:\temp\umd\points\borneo_day2015.shp",
 
 #merge point data 
 arcpy.env.workspace = r"D:\temp\umd\points"
-merged_file = "D:\temp\umd\points\gfw_landsat_alerts.shp"
+merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
 arcpy.Merge_management(["roc_day2015.shp", "peru_day2015.shp", "borneo_day2015.shp"], merged_file)
+print "points merged"
 
 #add date field to merged file 
 merged_file = "D:\temp\umd\points\gfw_landsat_alerts.shp"
 field_name = "date"
 field_type = "TEXT"
 arcpy.AddField_management(merged_file, field_name, field_type)
+print "date field added"
 
-#Calculate date from julian dates "GRID_CODE"
-expression = convert_julian(!GRID_CODE!)
-code_block = """"
-def convert_julian(date):
-	d = datetime.datetime.strptime(date, '%j')
-	d.strftime("%Y/%m/%d")
-	dnew = d.replace(year = 2015)
-	return dnew """
-arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3", code_block)
+#Create function that converts julian dates to regular dates 
+
+def getDate(day):
+	Y=2015
+	if day < 32:
+		M = 1 
+		D = day
+	elif day < 60:
+		M = 2
+		D = day - 31
+	elif day < 91:
+		M = 3
+		D = day - 59
+	elif day < 121:
+		M = 4
+		D = day - 90
+	elif day < 152:
+		M = 5
+		D = day - 120
+	elif day < 182:
+		M = 6
+		D = day - 151
+	elif day < 213:
+		M = 7
+		D = day - 181
+	elif day < 244:
+		M = 8
+		D = day - 212
+	elif day < 274:
+		M = 9
+		D = day - 243
+	elif day < 305:
+		M = 10
+		D = day - 273
+	elif day < 335:
+		M = 11
+		D = day - 304
+	elif day < 366:
+		M = 12
+		D = day - 334
+	d =str( D) + "-" + str(M) + "-" + str(Y)
+	return d
+
+#execute calculate field 
+expression = getDate("!GRID_CODE!")
+field_name = "date"	
+arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3")
+print "dates converted"
 	
 
