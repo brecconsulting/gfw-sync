@@ -60,46 +60,11 @@ print "date field added"
 
 #Create function that converts julian dates to regular dates 
 
-def getDate(day):
-	Y=2015
-	if day < 32:
-		M = 1 
-		D = day
-	elif day < 60:
-		M = 2
-		D = day - 31
-	elif day < 91:
-		M = 3
-		D = day - 59
-	elif day < 121:
-		M = 4
-		D = day - 90
-	elif day < 152:
-		M = 5
-		D = day - 120
-	elif day < 182:
-		M = 6
-		D = day - 151
-	elif day < 213:
-		M = 7
-		D = day - 181
-	elif day < 244:
-		M = 8
-		D = day - 212
-	elif day < 274:
-		M = 9
-		D = day - 243
-	elif day < 305:
-		M = 10
-		D = day - 273
-	elif day < 335:
-		M = 11
-		D = day - 304
-	elif day < 366:
-		M = 12
-		D = day - 334
-	d =str( D) + "-" + str(M) + "-" + str(Y)
-	return d
+filetest= '2007300.file'
+day = int(filetest[4:-5])
+year = int(filetest[0:-8])
+date = datetime.datetime(year, 1,1)+ datetime.timedelta(day-1)
+newfile = 'day%s.file'%date.strftime('%Y%m%d')
 
 #execute calculate field 
 expression = getDate("!GRID_CODE!")
