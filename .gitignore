@@ -56,5 +56,8 @@ docs/_build/
 # Config files
 config/*.config
 
+# Google key JSON files
+spreadsheet.json
+
 #pycharm
 .idea/
