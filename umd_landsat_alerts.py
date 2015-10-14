@@ -71,5 +71,9 @@ expression = getDate("!GRID_CODE!")
 field_name = "date"	
 arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3")
 print "dates converted"
+
+#copy data to S3
+arcpy.Copy_management("gfw_landsat_alerts.shp", "F:\forest_change\umd_landsat_alerts")
+
 	
 
