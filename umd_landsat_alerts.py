@@ -9,7 +9,7 @@ from datetime import datetime
 arcpy.CheckOutExtension("Spatial")
 arcpy.env.overwriteOutput = True
 
-'''
+
 #specify S3 urls to the umd alert data 
 urls = [
 r"http://umd-landsat-alerts.s3.amazonaws.com/roc_day2015.tif", 
@@ -50,7 +50,7 @@ r"D:\temp\umd\points\borneo_day2015.shp",
 arcpy.env.workspace = r"D:\temp\umd\points"
 merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
 arcpy.Merge_management(["roc_day2015.shp", "peru_day2015.shp", "borneo_day2015.shp"], merged_file)
-print "points merged"'''
+print "points merged"
 
 #add date field to merged file 
 merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
