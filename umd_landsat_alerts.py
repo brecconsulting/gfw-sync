@@ -3,12 +3,11 @@ import os
 import arcpy
 from arcpy import env
 from arcpy.sa import *
-from datetime import datetime
+import datetime
 
 #Check out ArcGIS Extensions
 arcpy.CheckOutExtension("Spatial")
 arcpy.env.overwriteOutput = True
-
 
 #specify S3 urls to the umd alert data 
 urls = [
@@ -56,26 +55,27 @@ print "points merged"
 merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
 field_name = "date"
 field_type = "TEXT"
-arcpy.AddField_management(merged_file, field_name, field_type)
+arcpy.AddField_management(merged_file, field_name, field_type, 254, "", "", "", "NULLABLE")
 print "date field added"
 
 #Create function that converts julian dates to regular dates 
+field_name = "date"
+merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
 
-filetest= '2007300.file'
-day = int(filetest[4:-5])
-year = int(filetest[0:-8])
-date = datetime.datetime(year, 1,1)+ datetime.timedelta(day-1)
-newfile = 'day%s.file'%date.strftime('%Y%m%d')
+codeblock = '''def getDate(date_str):\n
+	d = datetime.datetime.strptime(date_str, '%j')\n
+	d.strftime('%Y/%m/%d')\n
+	newd = d.replace(year = 2015)\n
+	return newd\n'''
+	
+expression = 'getDate(str(!GRID_CODE!))'
 
 #execute calculate field 
-expression = getDate("!GRID_CODE!")
-field_name = "date"	
-arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3")
+arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3", codeblock)
 print "dates converted"
 
 #copy data to S3
-arcpy.Copy_management("gfw_landsat_alerts.shp", r"F:\forest_change\umd_landsat_alerts")
+merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
+arcpy.Copy_management(merged_file, r"F:\forest_change\umd_landsat_alerts\gfw_landsat_alerts.shp")
 print "data in s3"
-
-	
 
