@@ -59,5 +59,8 @@ config/*.config
 # Google key JSON files
 spreadsheet.json
 
+#hot OSM token
+config/hot_export_token.txt
+
 #pycharm
 .idea/
