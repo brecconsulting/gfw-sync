@@ -60,7 +60,7 @@ for job_uid in job_uids:
 
 done = False
 
-while done:
+while not done:
 
     time.sleep(60)
     done = True
@@ -144,8 +144,8 @@ arcpy.Delete_management(temp_feature_class)
 print "Transform layer to WGS84 and archive"
 
 export_folder = r'F:\forest_use\infrastructure'
-zip_folder = os.join.path(export_folder, "zip")
-archive_folder = os.join.path(export_folder, "archive")
-export_shp = os.path.join(export_folder, os.path.basename(out_feature_class))
+zip_folder = os.path.join(export_folder, "zip")
+archive_folder = os.path.join(export_folder, "archive")
+export_shp = os.path.join(temp_folder, os.path.basename(out_feature_class))
 archiver.archive_shapefile(export_shp, scratch_workspace, zip_folder, archive_folder, False)
 
