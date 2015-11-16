@@ -39,12 +39,12 @@ def get_job(job_uid):
 
     return urllib2.urlopen(request)
 
-job_uids = ["232bfe18-6d54-4922-82a9-901cf378d66f",
-            "2300c2a0-0853-40ca-b8dd-761341a29234",
-            "4e4c3427-28f2-4dcc-9623-1ef22958ee97",
-            "c8be360c-1531-467e-978b-e3d77521e01f",
-            "5466b5aa-2b3a-4956-a8a7-6739b444ca75",
-            "87360642-9a33-47f5-ae94-f580e1376409"]
+job_uids = ["2c5d8ae4-940a-445b-b34a-0e922a40598c",
+            "3b88a831-e2a0-4c80-8b25-cd3bc64ffd2f",
+            "eb1b2c7a-1f98-4537-831c-8c5a63d7aac1",
+            "abfa0ee1-77d5-40cc-a0a5-8a753d3366bf",
+            "564c55c0-5fca-4a23-86d8-8eb02ea725fc",
+            "e01ec754-a943-405d-8691-31dab9840af3"]
 
 
 for job_uid in job_uids:

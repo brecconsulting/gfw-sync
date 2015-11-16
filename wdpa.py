@@ -92,8 +92,8 @@ def wdpa():
 	print src_gdb
 
 	#src_gdb = os.path.join(path,"%s.gdb" % wdpa) #download_wdpa(url, wdpa, path)
-	dst_gdb = r"D:\scripts\connections\test (gfw).sde\conservation"
-	sde_gdb = r"D:\scripts\connections\test (sde).sde"
+	dst_gdb = r"D:\scripts\connections\gfw (localhost).sde\conservation"
+	sde_gdb = r"D:\scripts\connections\gfw (sde).sde"
 
 	wdpa_fc = "wdpa_protected_areas"
 

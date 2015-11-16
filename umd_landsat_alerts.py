@@ -74,8 +74,25 @@ expression = 'getDate(str(!GRID_CODE!))'
 arcpy.CalculateField_management(merged_file, field_name, expression, "PYTHON_9.3", codeblock)
 print "dates converted"
 
+#add confidence field to merged file 
+'''field_name2 = "confi"
+field_type2 = "TEXT"
+arcpy.AddField_management(merged_file, field_name2, field_type2)
+print "confidence field added"'''
+
+#extract confidence values to merged file
+'''rasters = [
+r"D:\temp\umd\roc_conf2015.tif"
+r"D:\temp\umd\peru_conf2015.tif"
+r"D:\temp\umd\borneo_conf2015.tif"
+]'''
+
+#check to see if data exists in S3 
+'''env.workspace = r"F:\forest_change\umd_landsat_alerts"
+arcpy.Delete_management(r"F:\forest_change\umd_landsat_alerts\gfw_landsat_alerts.shp")'''
+
 #copy data to S3
 merged_file = r"D:\temp\umd\points\gfw_landsat_alerts.shp"
 arcpy.Copy_management(merged_file, r"F:\forest_change\umd_landsat_alerts\gfw_landsat_alerts.shp")
-print "data in s3"
+print "new data copied to s3"
 

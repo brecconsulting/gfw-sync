@@ -208,13 +208,18 @@ def update_imazon_sad():
         
         append_to_imazon_sad(shp_path,target_fc)
 
-    if len(zipfiles):
-        print "repair geometries"
-        arcpy.RepairGeometry_management(target_fc, "DELETE_NULL")
+    #if len(zipfiles):
+    #    print "repair geometries"
+    #    arcpy.RepairGeometry_management(target_fc, "DELETE_NULL")
 
     print "Export to Shapefile"
-    arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
     export_shp =  os.path.join(scratch_folder, fc + ".shp")
+    arcpy.MultipartToSinglepart_management(target_fc, export_shp)
+    arcpy.RepairGeometry_management(export_shp, "DELETE_NULL")
+    arcpy.DeleteField_management (export_shp, "st_area_sh")
+    arcpy.DeleteField_management (export_shp, "st_length_")
+    arcpy.DeleteField_management (export_shp, "ORIG_FID")
+    #arcpy.FeatureClassToShapefile_conversion([target_fc], scratch_folder)
     archiver.archive_shapefile(export_shp, scratch_folder, zip_folder, arc_folder, local=True)
     
     print "Convert to WGS84 and export to Shapefile"
