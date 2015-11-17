@@ -6,16 +6,19 @@ import datetime, time
 import arcpy
 from arcpy.sa import *
 import datetime
+import urllib
 # set environments
 arcpy.env.overwriteOutput = "TRUE"
 arcpy.env.workspace = r'D:\_sam\terraI'
 arcpy.env.scratchWorkspace = r'D:\_sam\terraI\scratch.gdb'
 
 # set input files
-latest_raster = r'D:\_sam\terraI\latin_decrease_current_proj_clip.tif'
-base_points = r'D:\_sam\terraI\latin_decrease_current_proj_clip.shp'
-
+terrai_file = urllib.urlretrieve("http://www.terra-i.org/data/current/raster/latin_decrease_current.tif",
+                                          r'D:\_sam\terraI\latest_file.tif')
+latest_raster = r'D:\_sam\terraI\latest_file.tif'
+base_points = r'D:\_sam\terraI\latin_decrease_current_111715.shp'
 country_file = r'H:\gfw_gis_team_data\gadm27_levels.gdb\adm0'
+
 arcpy.CheckOutExtension("Spatial")
 # find max value from base points
 arcpy.MakeFeatureLayer_management(base_points,"base_points_lyr")
