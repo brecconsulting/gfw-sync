@@ -49,6 +49,7 @@ if not os.path.exists(points_to_append):
 print "joining new points with country file"
 points_to_append_intersect = "pointstoappend_intersect.shp"
 
+# split points to smaller chunks
 arcpy.MakeFeatureLayer_management(points_to_append,"points_to_append_lyr")
 arcpy.MakeFeatureLayer_management(country_file,"country_file_lyr")
 arcpy.SpatialJoin_analysis("points_to_append_lyr","country_file_lyr",points_to_append_intersect,"JOIN_ONE_TO_ONE","KEEP_ALL","","INTERSECT")
