@@ -1,6 +1,7 @@
 ''' author: Sam Gibbes
 Date: 11/5/15
  purpose: Start with a file of all terra i point, this script will append new terra i updates
+ raster math to compare 
 '''
 import datetime, time
 import arcpy
