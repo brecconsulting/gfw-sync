@@ -8,6 +8,7 @@ from arcpy.sa import *
 import datetime
 import urllib
 import os
+start = datetime.datetime.now()
 # set environments
 arcpy.env.overwriteOutput = "TRUE"
 maindir = r'D:\_sam\terraI\testing'
@@ -45,41 +46,65 @@ if not os.path.exists(points_to_append):
     print "convert raster to point"
     arcpy.RasterToPoint_conversion(latest_raster_extract,points_to_append,"VALUE")
 
-# joining new points with country file
-print "joining new points with country file"
-points_to_append_intersect = "pointstoappend_intersect.shp"
 
 # split points to smaller chunks
-arcpy.MakeFeatureLayer_management(points_to_append,"points_to_append_lyr")
-arcpy.MakeFeatureLayer_management(country_file,"country_file_lyr")
-arcpy.SpatialJoin_analysis("points_to_append_lyr","country_file_lyr",points_to_append_intersect,"JOIN_ONE_TO_ONE","KEEP_ALL","","INTERSECT")
-# remove extra fields
-print "remove extra fields"
-fieldstokeep = ['POINTID','GRID_CODE', 'ISO']
-fieldNameList = []
-fieldObjList = arcpy.ListFields(points_to_append_intersect)
-for field in fieldObjList:
-    if not field.required:
-        if not field.name in fieldstokeep:
-            fieldNameList.append(field.name)
-arcpy.DeleteField_management(points_to_append_intersect, fieldNameList)
+print "creating fishnet"
+desc = arcpy.Describe(points_to_append)
+arcpy.CreateFishnet_management("fishnet.shp",str(desc.extent.lowerLeft),str(desc.extent.XMin) + " " + str(desc.extent.YMax + 10),"","",10,10,str(desc.extent.upperRight),"NO_LABELS","","POLYGON")
+arcpy.AddField_management("fishnet.shp","split_ID","TEXT")
+expression=""""ID_"+str( !FID!)"""
+arcpy.CalculateField_management("fishnet.shp","split_ID",expression,"PYTHON_9.3")
+
+print "splitting points into 100 chunks"
+split_dir = os.path.join(maindir,"split.gdb")
+if not os.path.exists(split_dir):
+    arcpy.CreateFileGDB_management(maindir,"split.gdb")
+arcpy.Split_analysis(points_to_append,"fishnet.shp","split_ID",split_dir)
+
+
+split_dir_int = os.path.join(maindir,"split_int.gdb")
+arcpy.CreateFileGDB_management(maindir,"split_int.gdb")
+arcpy.env.workspace = split_dir
+features = arcpy.ListFeatureClasses()
+
+print "joining points to countries..."
+for feature in features:
+    points_to_append_intersect = os.path.join(split_dir_int,feature)
+    arcpy.SpatialJoin_analysis(feature,country_file,points_to_append_intersect,"JOIN_ONE_TO_ONE","KEEP_ALL","","INTERSECT")
+    # remove extra fields
+    print "     remove extra fields from " + str(feature)
+    fieldstokeep = ['POINTID','GRID_CODE', 'ISO']
+    fieldNameList = []
+    fieldObjList = arcpy.ListFields(points_to_append_intersect)
+    for field in fieldObjList:
+        if not field.required:
+            if not field.name in fieldstokeep:
+                fieldNameList.append(field.name)
+    arcpy.DeleteField_management(points_to_append_intersect, fieldNameList)
+
+print "merge all the features back into one"
+arcpy.env.workspace = split_dir_int
+pointstomerge = arcpy.ListFeatureClasses()
+points_to_append_int_merge = os.path.join(maindir,'points_to_append_int_merge.shp')
+arcpy.Merge_management(pointstomerge,points_to_append_int_merge)
 
 # add observation date field to points to append
-arcpy.AddField_management(points_to_append_intersect,"obs_date","TEXT")
+arcpy.AddField_management(points_to_append_int_merge,"obs_date","TEXT")
 
 # update date field
 print "update date field"
 fields = ['GRID_CODE','obs_date']
-with arcpy.da.UpdateCursor(points_to_append_intersect,fields) as cursor:
-    for row in cursor:
-        gridcode = row[0]
-        year = 2004+int((gridcode)/23)
-        year_format = datetime.datetime.strptime(str(year) +"/01/01",'%Y/%m/%d')
-        days = datetime.timedelta(days=(gridcode%23)*16)
-        date_formatted= (year_format+days).strftime('%m/%d/%Y')
-        row[1]=date_formatted
-        cursor.updateRow(row)
+with arcpy.da.UpdateCursor(points_to_append_int_merge,fields) as cursor:
+   for row in cursor:
+       gridcode = row[0]
+       year = 2004+int((gridcode)/23)
+       year_format = datetime.datetime.strptime(str(year) +"/01/01",'%Y/%m/%d')
+       days = datetime.timedelta(days=(gridcode%23)*16)
+       date_formatted= (year_format+days).strftime('%m/%d/%Y')
+       row[1]=date_formatted
+       cursor.updateRow(row)
 
 # append points
 print "append points"
-arcpy.Append_management(points_to_append_intersect,base_points)
+arcpy.Append_management(points_to_append_int_merge,base_points)
+print "total elapsed time: " + str(datetime.datetime.now() - start)
