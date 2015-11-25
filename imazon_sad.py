@@ -5,6 +5,7 @@ import datetime
 import zipfile
 import shutil
 import logging
+import calendar
 
 from bs4 import BeautifulSoup  # pip install beuatifulsoup4
 import requests  # pip install requests
@@ -117,8 +118,12 @@ def unzip(filename, folder):
 def get_date_from_filename(filename):
     parts = filename.split('_')
     date_obj = datetime.datetime.strptime(parts[3], '%Y-%m')
+    year = date_obj.year
+    month = date_obj.month
+    day = calendar.monthrange(year, month)[1]
+    imazon_date = datetime.date (year, month, day)
     
-    return date_obj
+    return imazon_date
 
 
 def get_data_type_from_filename(filename):
@@ -142,17 +147,22 @@ def append_to_imazon_sad(input_shp, target_fc):
     arcpy.Append_management(input_layer, target_fc, "NO_TEST", fms, "")
 
     target_layer = "target_layer"
-    arcpy.MakeFeatureLayer_management(target_fc, target_layer, "orig_fname IS NULL OR orig_fname = ''", "", "")
+    arcpy.MakeFeatureLayer_management(target_fc, target_layer, "gfwid = ' ' OR gfwid = '' OR gfwid IS NULL")
 
     date_obj = get_date_from_filename(input_shp)
     data_type = get_data_type_from_filename(input_shp)
     fname = os.path.basename(input_shp)
 
-    print "update fields"
-    arcpy.CalculateField_management(target_layer, "date", "'%s'" % date_obj.strftime("%m/%d/%Y"), "PYTHON", "")
-    arcpy.CalculateField_management(target_layer, "data_type", "'%s'" % data_type, "PYTHON", "")
-    arcpy.CalculateField_management(target_layer, "orig_fname", "'%s'" % fname, "PYTHON", "")
+    print fname
 
+    counts = arcpy.GetCount_management(target_layer)
+    print int(counts.getOutput(0))
+
+    print "update fields"
+    arcpy.CalculateField_management(target_layer, "date", "'%s'" % date_obj.strftime("%m/%d/%Y"), "PYTHON")
+    arcpy.CalculateField_management(target_layer, "data_type", "'%s'" % data_type, "PYTHON")
+    arcpy.CalculateField_management(target_layer, "orig_fname", "'%s'" % fname, "PYTHON")
+    arcpy.CalculateField_management(target_layer, "gfwid", "!globalid![1:-1]", "PYTHON")
     
 def update_imazon_sad():
     
