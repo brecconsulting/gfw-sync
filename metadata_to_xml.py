@@ -62,15 +62,17 @@ metadata = md.MetadataEditor(filepath)
 
 #write metadata from spreadsheet to .xml file
 metadata.title.set(title)
-metadata.abstract.set(overview)
 metadata.purpose.set(function)
 metadata.extent_description.set(geographic_coverage)
-metadata.temporal_extent_description.set(date_of_content)
-metadata.update_frequency_description.set(update_frequency)
-metadata.credits.set(credits)
-metadata.citation.set(citation)
-metadata.limitation.set(cautions)
 metadata.source.set(source)
+metadata.update_frequency_description.set(update_frequency)
+metadata.temporal_extent_description.set(date_of_content)
+metadata.limitation.set(cautions)
+metadata.abstract.set(overview)
+metadata.citation.set(citation)
+metadata.language.set(data_language)
+metadata.last_update.set(last_update)
+
 metadata.finish()
 
 #remove then add tags 
