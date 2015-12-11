@@ -10,7 +10,9 @@ import settings
 import archiver
 
 def get_auth_key():
-    token_file = r"config\hot_export_token.txt"
+    abspath = os.path.abspath(__file__)
+    dir_name = os.path.dirname(abspath)
+    token_file = os.path.join(dir_name, r"config\hot_export_token.txt")
     with open(token_file, "r") as f:
         for row in f:
             return row
