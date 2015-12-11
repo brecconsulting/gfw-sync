@@ -26,23 +26,26 @@ def cartodb_push(file_name):
                     'CartoDB:wri-01', file_name])    
 
 
-def push_imazon():
-    table = 'imazon_sad_copy2'
-    folder = r'C:\Users\Thomas.Maschler\Desktop\imazon_sad'
+def update_cartodb(shp, production_table):
 
-    shp = os.path.join(folder, "%s.shp" % table)
+    basename = os.path.basename(shp)
+    staging_table = os.path.splitext(basename)[0]
 
-    print "truncate"
-    sql= 'TRUNCATE %s' % table
+    print "truncate staging"
+    sql= 'TRUNCATE %s' % staging_table
     cartodb_sql(sql)
 
-    print "append"
+    print "upload data"
     cartodb_push(shp)
     
     print "repair geometry"
-    sql = 'UPDATE %s SET the_geom = ST_MakeValid(the_geom), the_geom_webmercator = ST_MakeValid(the_geom_webmercator) WHERE ST_IsValid(the_geom) = false' % table
+    sql = 'UPDATE %s SET the_geom = ST_MakeValid(the_geom), the_geom_webmercator = ST_MakeValid(the_geom_webmercator) WHERE ST_IsValid(the_geom) = false' % staging_table
+    cartodb_sql(sql)
+
+    print "push to production"
+    sql= 'TRUNCATE %s; INSERT INTO %s SELECT * FROM %s; COMMIT' % (production_table, production_table, staging_table)
     cartodb_sql(sql)
 
 
 if __name__ == "__main__":
-    push_imazon()
+    update_cartodb(r'C:\Users\Thomas.Maschler\Desktop\imazon_sad\imazon_sad_copy2.shp', 'imazon_sad_copy')
