@@ -2,6 +2,7 @@ import urllib
 import subprocess
 import os
 
+
 def get_auth_key():
     abspath = os.path.abspath(__file__)
     dir_name = os.path.dirname(abspath)
@@ -10,26 +11,34 @@ def get_auth_key():
         for row in f:
             return row
 
-table = 'imazon_sad_copy2'
-folder = r'C:\Users\Thomas.Maschler\Desktop\imazon_sad'
-shp = os.path.join(folder, "%s.shp" % table)
+def cartodb_sql(sql):
+    key = get_auth_key()
+    return urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key=%s&q=%s" % (key, sql))
+    
 
-key= get_auth_key()
-sql= 'TRUNCATE %s' % table
+def push_imazon():
+    table = 'imazon_sad_copy2'
+    folder = r'C:\Users\Thomas.Maschler\Desktop\imazon_sad'
 
-print "truncate"
-print urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key=%s&q=%s" % (key, sql))
+    shp = os.path.join(folder, "%s.shp" % table)
 
-print "append"
-subprocess.call([r'C:\Program Files\GDAL\ogr2ogr.exe',
-                '--config', 'CARTODB_API_KEY', key,
-                 '-append', '-progress', '-skipfailures',
-                '-t_srs', 'EPSG:4326',
-                '-f', 'CartoDB',
-                'CartoDB:wri-01', shp])
+    print "truncate"
+    sql= 'TRUNCATE %s' % table
+    cartodb_sql(sql)
 
-sql = 'UPDATE %s SET the_geom = ST_MakeValid(the_geom), the_geom_webmercator = ST_MakeValid(the_geom_webmercator) WHERE ST_IsValid(the_geom) = false' % table
+    print "append"
+    key = get_auth_key()
+    subprocess.call([r'C:\Program Files\GDAL\ogr2ogr.exe',
+                    '--config', 'CARTODB_API_KEY', key,
+                     '-append', '-progress', '-skipfailures',
+                    '-t_srs', 'EPSG:4326',
+                    '-f', 'CartoDB',
+                    'CartoDB:wri-01', shp])
+    
+    print "repair geometry"
+    sql = 'UPDATE %s SET the_geom = ST_MakeValid(the_geom), the_geom_webmercator = ST_MakeValid(the_geom_webmercator) WHERE ST_IsValid(the_geom) = false' % table
+    cartodb_sql(sql)
 
-print "repair geometry"
-print urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key=%s&q=%s" % (key, sql))
 
+if __name__ == "__main__":
+    push_imazon()
