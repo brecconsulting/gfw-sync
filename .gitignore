@@ -59,11 +59,13 @@ config/*.config
 # Google key JSON files
 spreadsheet.json
 
-# New Google Key JSON File
-metadata_spreadsheet.json
-
 #hot OSM token
+=======
+#tokens
+>>>>>>> origin/master
 config/hot_export_token.txt
+config/cartodb_token.txt
+
 
 #pycharm
 .idea/
