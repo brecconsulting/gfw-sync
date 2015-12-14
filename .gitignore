@@ -59,6 +59,9 @@ config/*.config
 # Google key JSON files
 spreadsheet.json
 
+# New Metadata Google key JSON files
+metadata_spreadsheet.json
+
 #hot OSM token
 =======
 #tokens
