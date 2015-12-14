@@ -10,10 +10,7 @@ script, filename, filepath = argv
 #specify oauth2client credentials 
 json_key = json.load(open('metadata_spreadsheet.json'))
 scope = ['https://spreadsheets.google.com/feeds']
-client_email = json_key['client_id']
-private_key = json_key['client_secret'].encode()
-credentials = SignedJwtAssertionCredentials(client_email, private_key, scope)
-#credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
+credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 
 #authorize oauth2client credentials 
 gc = gspread.authorize(credentials)
