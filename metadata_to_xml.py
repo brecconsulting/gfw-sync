@@ -8,7 +8,7 @@ from sys import argv
 script, filename, filepath = argv
 
 #specify oauth2client credentials 
-json_key = json.load(open('metadata_spreadsheet.json'))
+json_key = json.load(open('test.json'))
 scope = ['https://spreadsheets.google.com/feeds']
 credentials = SignedJwtAssertionCredentials(json_key["client_id"], json_key["client_secret"].encode(), scope)
 
