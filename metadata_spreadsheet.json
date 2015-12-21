@@ -1,1 +1,12 @@
-{"web":{"client_id":"568319700978-i4iuqi41askk25a7bbpd3til23l42cce.apps.googleusercontent.com","project_id":"metadata-spreadsheet","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"3Oi19ckV3n1wyOHHzWCgO7xQ"}}
+{
+  "type": "service_account",
+  "project_id": "metadata-spreadsheet",
+  "private_key_id": "1764310817cc0f5797f9103eb0cfa14ef0361723",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCJjO6ZIE9J3+Ax\nJz5CCWFfbjeA62CZVv5rUoHfWmCuTgBLpgw1/5FQHH/CIVQ472rOzHi7Z9lBqJJ+\n4lbJDmXA3j2l6xjkfhRd9K+gZeu8azGf21QBTTuBsEQ/Q4Ef2iIvDO5lGdIcg2pX\nQnp3IRE5Zh16Z7g251HocHKfXYhehL7gnzoMOK9c/1QyTYbPlgY0sbgpuSW4hOnq\nHhiKljgM9bWYr9F6C9HXDbIMQINcd3JFm19+JRjp68N/nCDRODHtGZVJg+c0TUBz\nGOfE+Oq5h6zjJ+/8FO/hEF7vjgCRkIzsfqAJjNINASYaZRPfCEixbtq6oAKloi4e\nP3LkNkHfAgMBAAECggEABcFFwlZduuOJB8Vyj2TBFDMSU2yFsCS5pFfhYyzu2pwc\n2w1peWDl/YoTtlWapn8t4tUfQAgKSPr6liB2LRdTHoyt26FIe1bjF0NDjdx1zn5V\npzCQBTXsBXMQh+0VG/YOdBWAa+52ogbFjj0TzqQtik9BcHuic3meLbF2ukA5kmq/\nryG3AASOfl12voDd1KUVz7H7LiLETGXgM1Dda0Ui7AbMG+pS4cljY+MhP94mnXH1\nOIwLnqoAlGEDWS5PKpFbqIXuYkN+0iJhMizYSod3z57O5ICG3qisTOupeSP85EhD\nZpFNL/T/KjyqcAUQdeLTXo6Tiv3ihJDlgp2ld31T8QKBgQDG2g77jP719fUx/fLS\n+olk4p3MJN6OQFGfYF4ZhIiRQzclqf2k6VkUmBIVc4ghsJxAX1kEvIrA2XGo1H7P\nXLcOW1PIM25no8YkgiuNKf2dvO58DheF06umuovQpQ21Vt4zJtB942N1W8iijrLC\nhoZubwpMBbt5d217fV5pJSEfNQKBgQCxFM+IF3KgqzK8cUNUpei8gnV/VYYmw/6U\nLubz/ohP2jPQGWplsVmPwLVMBmJBl6LtsprYurq30Zay1MlCb2n2xDoLzsQr8kJ0\n9QgDFv1SrG+A0KMNbnnQkGT2aJ07tLT+kqODULe6f/DvaKOFij4kEshyLZIMl8Ka\nBrkSOs6bQwKBgBd82Do0PEVXKQAfq9fpyeLFtbfQPw10YW++1T6UXgEyfEgRnSkm\neuQo1jH8dH7uOnaMDJq3nngK9xbnCpd5rxGeDfZexNKvEI9tZLGG3TMNhunWTEb9\napAGBs+9PzJFMXe/RO8ptay+C6PP0SOS+jv/F6tFHhDJ33+vnkAzJ4dlAoGAVBFG\nKRzAnYhJEO9QgLo3EG966pWml3bKwHy3xjQbcJVtraizO04D79wT9eC9+tfLUL9P\nBf84L5Y/zex5E6IjEzS7PenOdfKQHEhLonPilcIpOWVTU0gUarByTg0CQFsc5hKl\nr+y9HLwqnO33W6lysNt97760rGfLyiXQ7NegSFMCgYB8+LBuZlMl7sWPdVQik1il\npusCo2JVI74RQ07rCE+S7hfZKccJCaKEezat45jBPxbv3bt3WY1S3xQ7Qe3X9DbY\nnibuFks8uZCH0aB7k5uTzNEDe0MMPAKeMjtailx8yQ8q98PJveO0fMd1Ek/Axiiu\nRM1lTC4fPdNEToTGHzF+Vg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "metadata-spreadsheet@metadata-spreadsheet.iam.gserviceaccount.com",
+  "client_id": "110512092384643446235",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/metadata-spreadsheet%40metadata-spreadsheet.iam.gserviceaccount.com"
+}
