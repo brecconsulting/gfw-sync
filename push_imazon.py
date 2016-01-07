@@ -20,10 +20,12 @@ def cartodb_push(file_name):
     key = get_auth_key()
     subprocess.call([r'C:\Program Files\GDAL\ogr2ogr.exe',
                     '--config', 'CARTODB_API_KEY', key,
-                    '-append', '-progress', '-skipfailures',
+                    #'-append',
+                    '-progress', '-skipfailures',
                     '-t_srs', 'EPSG:4326',
                     '-f', 'CartoDB',
-                    'CartoDB:wri-01', file_name])    
+                    'CartoDB:wri-01', file_name])
+
 
 
 def update_cartodb(shp, production_table):
@@ -31,9 +33,9 @@ def update_cartodb(shp, production_table):
     basename = os.path.basename(shp)
     staging_table = os.path.splitext(basename)[0]
 
-    print "truncate staging"
-    sql= 'TRUNCATE %s' % staging_table
-    cartodb_sql(sql)
+    #print "truncate staging"
+    #sql= 'TRUNCATE %s' % staging_table
+    #cartodb_sql(sql)
 
     print "upload data"
     cartodb_push(shp)
@@ -46,6 +48,9 @@ def update_cartodb(shp, production_table):
     sql= 'TRUNCATE %s; INSERT INTO %s SELECT * FROM %s; COMMIT' % (production_table, production_table, staging_table)
     cartodb_sql(sql)
 
+    print "delete staging"
+    sql= 'DROP TABLE IF EXISTS %s CASCADE' % staging_table
+    cartodb_sql(sql)
 
 if __name__ == "__main__":
     update_cartodb(r'C:\Users\Thomas.Maschler\Desktop\imazon_sad\imazon_sad_copy2.shp', 'imazon_sad_copy')
