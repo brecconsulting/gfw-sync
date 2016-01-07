@@ -8,9 +8,9 @@ from sys import argv
 script, filename, filepath = argv
 
 #specify oauth2client credentials 
-json_key = json.load(open('spreadsheet.json'))
+json_key = json.load(open('metadata_spreadsheet.json'))
 scope = ['https://spreadsheets.google.com/feeds']
-credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
+credentials = SignedJwtAssertionCredentials(json_key["client_email"], json_key["private_key"].encode(), scope) 
 
 #authorize oauth2client credentials 
 gc = gspread.authorize(credentials)
@@ -54,7 +54,7 @@ analysis = wks.cell(cell.row, 29).value
 scale = wks.cell(cell.row, 30).value
 wms = source_org = wks.cell(cell.row, 31).value
 data_updates = wks.cell(cell.row, 32).value
-date_ added = wks.cell(cell.row, 33).value
+date_added = wks.cell(cell.row, 33).value
 why_added = wks.cell(cell.row, 34).value
 
 #Let script know the path to the dataset that needs metadata 
