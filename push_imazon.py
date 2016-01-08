@@ -32,6 +32,8 @@ def update_cartodb(shp, production_table):
 
     basename = os.path.basename(shp)
     staging_table = os.path.splitext(basename)[0]
+    layerspec_table="layerspec_nuclear_hazard"
+    #layerspec_table="layerspec" in production 
 
     #print "truncate staging"
     #sql= 'TRUNCATE %s' % staging_table
@@ -46,6 +48,10 @@ def update_cartodb(shp, production_table):
 
     print "push to production"
     sql= 'TRUNCATE %s; INSERT INTO %s SELECT * FROM %s; COMMIT' % (production_table, production_table, staging_table)
+    cartodb_sql(sql)
+    
+    print "update layer spec max date"
+    sql = 'UPDATE %s set maxdate= (SELECT max(date)+1 FROM %s) WHERE table_name="%s"' % (layerspec_table, production_table, production_table )
     cartodb_sql(sql)
 
     print "delete staging"
