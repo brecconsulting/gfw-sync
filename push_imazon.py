@@ -51,7 +51,7 @@ def update_cartodb(shp, production_table):
     cartodb_sql(sql)
     
     print "update layer spec max date"
-    sql = 'UPDATE %s set maxdate= (SELECT max(date)+1 FROM %s) WHERE table_name="%s"' % (layerspec_table, production_table, production_table )
+    sql = "UPDATE %s set maxdate= (SELECT max(date)+1 FROM %s) WHERE table_name='%s'" % (layerspec_table, production_table, production_table )
     cartodb_sql(sql)
 
     print "delete staging"
