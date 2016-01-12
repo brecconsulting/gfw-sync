@@ -8,15 +8,16 @@ import json
 import sys
 import gspread
 from oauth2client.client import SignedJwtAssertionCredentials
+import io
 
 
 def byteify(input):
     if isinstance(input, dict):
-        return {byteify(key):byteify(value) for key,value in input.iteritems()}
+        return {byteify(key): byteify(value) for key, value in input.iteritems()}
     elif isinstance(input, list):
         return [byteify(element) for element in input]
     elif isinstance(input, unicode):
-        return input.encode('utf-8')
+        return input.encode('utf8')
     else:
         return input
 
@@ -47,22 +48,22 @@ def get_metadata(wks, row):
 
     #define metadata variables that correspond to cells in the metadata spreadsheet 
     md = {}
-    md["Title"] = wks.cell(row, 3).value
-    md["Translated_Title"] = wks.cell(row, 14).value
-    md["Function"] = wks.cell(row, 4).value
-    md["Overview"] = wks.cell(row, 12).value
-    md["Translated Overview"] = wks.cell(row, 16).value
+    md[u"Title"] = wks.cell(row, 3).value
+    md[u"Translated_Title"] = wks.cell(row, 14).value
+    md[u"Function"] = wks.cell(row, 4).value
+    md[u"Overview"] = wks.cell(row, 12).value
+    md[u"Translated Overview"] = wks.cell(row, 16).value
     #md["category"] = wks.cell(row, 10).value
-    md["Tags"] = wks.cell(row, 17).value #.value.split(", ")
-    md["Geographic Coverage"] = wks.cell(row, 6).value
-    md["Date of Content"] = wks.cell(row, 9).value
-    md["Frequency of Updates"] = wks.cell(row, 8).value
+    md[u"Tags"] = wks.cell(row, 17).value #.value.split(", ")
+    md[u"Geographic Coverage"] = wks.cell(row, 6).value
+    md[u"Date of Content"] = wks.cell(row, 9).value
+    md[u"Frequency of Updates"] = wks.cell(row, 8).value
     #md["credits"] = wks.cell(row, 18).value
-    md["Citation"] = wks.cell(row, 13).value
-    md["License"] = wks.cell(row, 11).value
-    md["Cautions"] = wks.cell(row, 10).value
-    md["Source"] = wks.cell(row, 7).value
-    md["Resolution"] = wks.cell(row, 5).value
+    md[u"Citation"] = wks.cell(row, 13).value
+    md[u"License"] = wks.cell(row, 11).value
+    md[u"Cautions"] = wks.cell(row, 10).value
+    md[u"Source"] = wks.cell(row, 7).value
+    md[u"Resolution"] = wks.cell(row, 5).value
 
     return md
 
@@ -77,8 +78,24 @@ def rebuild_cache(f):
         i += 1
         md[layer] = get_metadata(wks, i)
 
-    with open(f, 'w') as cache:
-        cache.write(json.dumps(md, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': ')).encode('utf8'))
+    with io.open(f, 'w', encoding='utf8') as cache:
+        cache.write(u'{')
+        i = 0
+        for layer in md.keys():
+            if i > 0:
+                cache.write(u', ')
+            cache.write(u"'%s': {" % layer)
+            j = 0
+            for field in md[layer].keys():
+                if j > 0:
+                    cache.write(u', ')
+                cache.write(u"'%s': '%s'" % (field, md[layer][field].replace("'", u"\u2019")))
+                j += 1
+            cache.write(u'}')
+
+            i += 1
+        cache.write(u'}')
+
 
 def print_json():
 
@@ -88,42 +105,40 @@ def print_json():
     cache_file = os.path.join(dir_name, 'cache.json')
     
     with open(cache_file) as cache:
-        data=cache.read()
+        data = cache.read()
 
-    cache = json.loads(data)
+    udata = data.decode('utf8')
 
     if len(sys.argv) < 2:
-        print cache
+        print byteify(cache)
 
     else:
 
-        print "Content-Type: application/json"
+        print "Content-Type: application/json; charset=utf-8"
         print
-
-        #if len(sys.argv) > 2:
-        #	args = sys.argv[2].split('&')
-        #	for arg in args:
-        #		pass
 
         if sys.argv[1] == 'rebuild_cache':
             rebuild_cache(cache_file)
-            cache = json.load(open(cache_file))
-            print byteify(cache)
+            print data.replace('\n', '\\n')
 
         elif os.path.dirname(sys.argv[1]) == dir_name:
-            print byteify(cache)
+            print data.replace('\n', '\\n')
 
         elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dir_name:
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
-                cache = json.load(open(cache_file))
-                print byteify(cache)
+                print data.replace('\n', '\\n')
 
-            elif layer in cache.keys():
-                print byteify(cache[layer])
             else:
-                print {"error": "Layer %s unknown" % layer}
+                if udata.find(u"'%s':" % layer) != -1:
+                    start = udata.find(u"'%s':" % layer) + len(u"'%s':" % layer)
+                    end = udata[start:].find(u'}') + start + 1
+
+                    output = udata[start:end].encode('utf8').strip().replace('\n', '\\n')
+                    print output
+                else:
+                    print {"error": "Layer %s unknown" % layer}
         else:
             print {"error": "wrong argument"}
 
