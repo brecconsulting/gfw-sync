@@ -121,7 +121,7 @@ def print_json():
             rebuild_cache(cache_file)
             print data.replace('\n', '\\n')
 
-        elif os.path.dirname(sys.argv[1]) == dir_name:
+        elif os.path.dirname(sys.argv[1]) == dir_name or sys.argv[1] == '%s\\metadata\\' % dir_name:
             print data.replace('\n', '\\n')
 
         elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dir_name:
