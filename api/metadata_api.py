@@ -113,7 +113,7 @@ def print_json():
         elif os.path.dirname(sys.argv[1]) == dir_name:
             print byteify(cache)
 
-        elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dirname:
+        elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dir_name:
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
