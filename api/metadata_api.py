@@ -23,7 +23,11 @@ def byteify(input):
 def open_spreadsheet():
 
     #specify oauth2client credentials
-    json_key = json.load(open(r'D:\scripts\api\spreadsheet.json'))
+    abspath = os.path.abspath(__file__)
+    dir_name = os.path.dirname(abspath)
+    spreadsheet_file = os.path.join(dir_name, 'spreadsheet.json')
+    
+    json_key = json.load(open(spreadsheet_file))
     scope = ['https://spreadsheets.google.com/feeds']
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
 
@@ -79,7 +83,10 @@ def rebuild_cache(f):
 def print_json():
 
 
-    cache_file = r'D:\scripts\api\cache.json'
+    abspath = os.path.abspath(__file__)
+    dir_name = os.path.dirname(abspath)
+    cache_file = os.path.join(dir_name, 'cache.json')
+    
     with open(cache_file) as cache:
         data=cache.read()
 
@@ -103,10 +110,10 @@ def print_json():
             cache = json.load(open(cache_file))
             print byteify(cache)
 
-        elif os.path.dirname(sys.argv[1]) == r'D:\scripts\api':
+        elif os.path.dirname(sys.argv[1]) == dir_name:
             print byteify(cache)
 
-        elif os.path.dirname(sys.argv[1]) == r'D:\scripts\api\metadata':
+        elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dirname:
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
