@@ -84,12 +84,12 @@ def rebuild_cache(f):
         for layer in md.keys():
             if i > 0:
                 cache.write(u', ')
-            cache.write(u"'%s': {" % layer)
+            cache.write(u'"%s": {' % layer)
             j = 0
             for field in md[layer].keys():
                 if j > 0:
                     cache.write(u', ')
-                cache.write(u"'%s': '%s'" % (field, markdown2.markdown(md[layer][field].replace("'", u"\u2019")).replace(u'\n',u'')))
+                cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n',u'')))
                 j += 1
             cache.write(u'}')
 
@@ -133,8 +133,8 @@ def print_json():
                 print data
 
             else:
-                if udata.find(u"'%s':" % layer) != -1:
-                    start = udata.find(u"'%s':" % layer) + len(u"'%s':" % layer)
+                if udata.find(u'"%s":' % layer) != -1:
+                    start = udata.find(u'"%s":' % layer) + len(u'"%s":' % layer)
                     end = udata[start:].find(u'}') + start + 1
 
                     output = udata[start:end].encode('utf8').strip()
