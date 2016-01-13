@@ -62,8 +62,7 @@ spreadsheet.json
 # New Metadata Google key JSON files
 /metadata_spreadsheet.json
 
-#hot OSM token
-=======
+
 #tokens
 >>>>>>> origin/master
 config/hot_export_token.txt
