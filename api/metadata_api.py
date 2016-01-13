@@ -9,7 +9,7 @@ import sys
 import gspread
 from oauth2client.client import SignedJwtAssertionCredentials
 import io
-
+import markdown2
 
 def byteify(input):
     if isinstance(input, dict):
@@ -89,7 +89,7 @@ def rebuild_cache(f):
             for field in md[layer].keys():
                 if j > 0:
                     cache.write(u', ')
-                cache.write(u"'%s': '%s'" % (field, md[layer][field].replace("'", u"\u2019")))
+                cache.write(u"'%s': '%s'" % (field, markdown2.markdown(md[layer][field].replace("'", u"\u2019")).replace(u'\n',u'')))
                 j += 1
             cache.write(u'}')
 
@@ -119,23 +119,25 @@ def print_json():
 
         if sys.argv[1] == 'rebuild_cache':
             rebuild_cache(cache_file)
-            print data.replace('\n', '\\n')
+            with open(cache_file) as cache:
+                data = cache.read()
+            print data
 
         elif os.path.dirname(sys.argv[1]) == dir_name or sys.argv[1] == '%s\\metadata\\' % dir_name:
-            print data.replace('\n', '\\n')
+            print data
 
         elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dir_name:
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
-                print data.replace('\n', '\\n')
+                print data
 
             else:
                 if udata.find(u"'%s':" % layer) != -1:
                     start = udata.find(u"'%s':" % layer) + len(u"'%s':" % layer)
                     end = udata[start:].find(u'}') + start + 1
 
-                    output = udata[start:end].encode('utf8').strip().replace('\n', '\\n')
+                    output = udata[start:end].encode('utf8').strip()
                     print output
                 else:
                     print {"error": "Layer %s unknown" % layer}
