@@ -47,22 +47,23 @@ def get_metadata(wks, row):
 
     #define metadata variables that correspond to cells in the metadata spreadsheet 
     md = {}
-    md["Title"] = wks.cell(row, 3).value
-    md["Translated_Title"] = wks.cell(row, 14).value
-    md["Function"] = wks.cell(row, 4).value
-    md["Overview"] = wks.cell(row, 12).value
-    md["Translated Overview"] = wks.cell(row, 16).value
+    md["title"] = wks.cell(row, 3).value
+    md["translated_title"] = wks.cell(row, 14).value
+    md["function"] = wks.cell(row, 4).value
+    md["overview"] = wks.cell(row, 12).value
+    md["translated_overview"] = wks.cell(row, 16).value
     #md["category"] = wks.cell(row, 10).value
-    md["Tags"] = wks.cell(row, 17).value #.value.split(", ")
-    md["Geographic Coverage"] = wks.cell(row, 6).value
-    md["Date of Content"] = wks.cell(row, 9).value
-    md["Frequency of Updates"] = wks.cell(row, 8).value
+    md["tags"] = wks.cell(row, 17).value #.value.split(", ")
+    md["geographic_coverage"] = wks.cell(row, 6).value
+    md["date_of_content"] = wks.cell(row, 9).value
+    md["frequency_of_updates"] = wks.cell(row, 8).value
     #md["credits"] = wks.cell(row, 18).value
-    md["Citation"] = wks.cell(row, 13).value
-    md["License"] = wks.cell(row, 11).value
-    md["Cautions"] = wks.cell(row, 10).value
-    md["Source"] = wks.cell(row, 7).value
-    md["Resolution"] = wks.cell(row, 5).value
+    md["citation"] = wks.cell(row, 13).value
+    md["license"] = wks.cell(row, 11).value
+    md["cautions"] = wks.cell(row, 10).value
+    md["source"] = wks.cell(row, 7).value
+    md["resolution"] = wks.cell(row, 5).value
+    md["learn_more_or_download_data"] = wks.cell(row, 21).value 
 
     return md
 
