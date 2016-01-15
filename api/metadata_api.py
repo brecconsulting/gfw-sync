@@ -65,6 +65,7 @@ def get_metadata(wks, row):
     md[u"source"] = wks.cell(row, 7).value
     md[u"resolution"] = wks.cell(row, 5).value
     md[u"learn_more_or_download_data"] = wks.cell(row, 21).value
+    md[u"other"] = wks.cell(row, 35).value
 
     return md
 
