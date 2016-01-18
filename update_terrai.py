@@ -2,7 +2,7 @@
 Date: 11/5/15
  purpose: Start with a file of all terra i point, this script will append new terra i updates
 '''
-import datetime, time
+
 import arcpy
 from arcpy.sa import *
 import datetime
