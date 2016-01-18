@@ -1,6 +1,7 @@
 import urllib
 import subprocess
 import os
+import json
 
 
 def get_auth_key():
@@ -11,21 +12,26 @@ def get_auth_key():
         for row in f:
             return row
 
-def cartodb_sql(sql):
+def cartodb_sql(sql, raise_error=True):
     key = get_auth_key()
-    return urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key=%s&q=%s" % (key, sql))
+    result = urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key=%s&q=%s" % (key, sql))
+    json_result = json.loads(result.readlines()[0])
+    if raise_error and  "error" in json_result.keys():
+        raise SyntaxError("Wrong SQL syntax.\n %s" %json_result['error'])
+    return json_result
 
     
 def cartodb_push(file_name):
     key = get_auth_key()
-    subprocess.call([r'C:\Program Files\GDAL\ogr2ogr.exe',
+    result = subprocess.check_call([r'C:\Program Files\GDAL\ogr2ogr.exe',
                     '--config', 'CARTODB_API_KEY', key,
                     #'-append',
-                    '-progress', '-skipfailures',
+                    '-skipfailures',
                     '-t_srs', 'EPSG:4326',
                     '-f', 'CartoDB',
-                    'CartoDB:wri-01', file_name])
-
+                    'CartoDB:wri-01', file_name], shell=True)
+    if result == 0:
+        raise RuntimeError("OGR2OGR threw an error")
 
 
 def update_cartodb(shp, production_table):

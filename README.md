@@ -1,5 +1,6 @@
 gfw-sync
 ========
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/61a42af2329b44458a5def1727e0f566/badge.svg)](https://www.quantifiedcode.com/app/project/61a42af2329b44458a5def1727e0f566)
 
 Synchronization stuff for easier management of GFW data
 
