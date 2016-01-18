@@ -48,22 +48,25 @@ def get_metadata(wks, row):
 
     #define metadata variables that correspond to cells in the metadata spreadsheet 
     md = {}
-    md[u"Title"] = wks.cell(row, 3).value
-    md[u"Translated_Title"] = wks.cell(row, 14).value
-    md[u"Function"] = wks.cell(row, 4).value
-    md[u"Overview"] = wks.cell(row, 12).value
-    md[u"Translated Overview"] = wks.cell(row, 16).value
+    md[u"title"] = wks.cell(row, 3).value
+    md[u"translated_title"] = wks.cell(row, 14).value
+    md[u"function"] = wks.cell(row, 4).value
+    md[u"overview"] = wks.cell(row, 12).value
+    md[u"translated_overview"] = wks.cell(row, 16).value
     #md["category"] = wks.cell(row, 10).value
-    md[u"Tags"] = wks.cell(row, 17).value #.value.split(", ")
-    md[u"Geographic Coverage"] = wks.cell(row, 6).value
-    md[u"Date of Content"] = wks.cell(row, 9).value
-    md[u"Frequency of Updates"] = wks.cell(row, 8).value
+    md[u"tags"] = wks.cell(row, 17).value #.value.split(", ")
+    md[u"geographic_coverage"] = wks.cell(row, 6).value
+    md[u"date_of_content"] = wks.cell(row, 9).value
+    md[u"frequency_of_updates"] = wks.cell(row, 8).value
     #md["credits"] = wks.cell(row, 18).value
-    md[u"Citation"] = wks.cell(row, 13).value
-    md[u"License"] = wks.cell(row, 11).value
-    md[u"Cautions"] = wks.cell(row, 10).value
-    md[u"Source"] = wks.cell(row, 7).value
-    md[u"Resolution"] = wks.cell(row, 5).value
+    md[u"citation"] = wks.cell(row, 13).value
+    md[u"license"] = wks.cell(row, 11).value
+    md[u"cautions"] = wks.cell(row, 10).value
+    md[u"source"] = wks.cell(row, 7).value
+    md[u"resolution"] = wks.cell(row, 5).value
+    md[u"learn_more_or_download_data"] = wks.cell(row, 21).value
+    md[u"other"] = wks.cell(row, 35).value
+    md[u"subtitle"] = wks.cell(row, 36).value
 
     return md
 
@@ -84,12 +87,12 @@ def rebuild_cache(f):
         for layer in md.keys():
             if i > 0:
                 cache.write(u', ')
-            cache.write(u'"%s": {' % layer)
+            cache.write(u'"{0!s}": {{'.format(layer))
             j = 0
             for field in md[layer].keys():
                 if j > 0:
                     cache.write(u', ')
-                cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n',u'')))
+                cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n',u'')))
                 j += 1
             cache.write(u'}')
 
@@ -123,24 +126,24 @@ def print_json():
                 data = cache.read()
             print data
 
-        elif os.path.dirname(sys.argv[1]) == dir_name or sys.argv[1] == '%s\\metadata\\' % dir_name:
+        elif os.path.dirname(sys.argv[1]) == dir_name or sys.argv[1] == '{0!s}\\metadata\\'.format(dir_name):
             print data
 
-        elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dir_name:
+        elif os.path.dirname(sys.argv[1]) == r'{0!s}\metadata'.format(dir_name):
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
                 print data
 
             else:
-                if udata.find(u'"%s":' % layer) != -1:
-                    start = udata.find(u'"%s":' % layer) + len(u'"%s":' % layer)
+                if udata.find(u'"{0!s}":'.format(layer)) != -1:
+                    start = udata.find(u'"{0!s}":'.format(layer)) + len(u'"{0!s}":'.format(layer))
                     end = udata[start:].find(u'}') + start + 1
 
                     output = udata[start:end].encode('utf8').strip()
                     print output
                 else:
-                    print {"error": "Layer %s unknown" % layer}
+                    print {"error": "Layer {0!s} unknown".format(layer)}
         else:
             print {"error": "wrong argument"}
 

@@ -17,7 +17,7 @@ def log_info(msg, l, v):
     if l:
         logging.info(msg)
     if v:
-        print "%s" % msg
+        print "{0!s}".format(msg)
         
 
 def log_msg(msg, msg_type, l, v):
@@ -30,18 +30,18 @@ def log_msg(msg, msg_type, l, v):
             logging.error(msg)
     if v:
         if msg_type == "i":
-            print "[VALID] %s" % msg
+            print "[VALID] {0!s}".format(msg)
         if msg_type == "w":
-            print "[WARNING] %s" % msg
+            print "[WARNING] {0!s}".format(msg)
         if msg_type == "e":
-            print "[FAILED] %s" % msg
+            print "[FAILED] {0!s}".format(msg)
             
 
 def validate_path(value):
     if isinstance(value, list):
         raise ValidateError('A list was passed when a path was expected')
     if not os.path.exists(value):
-        raise ValidateError('Path "%s"does not exists' % value)
+        raise ValidateError('Path "{0!s}"does not exists'.format(value))
 
     return value
 
@@ -54,7 +54,7 @@ def validate_drive(value):
     if len(value) != 3:
         raise ValidateError('Drive not in the right format')
     if not os.path.exists(value):
-        raise ValidateError('Drive "%s"does not exists' % value)
+        raise ValidateError('Drive "{0!s}"does not exists'.format(value))
     return value
 
 
@@ -79,21 +79,21 @@ def validate_bucket(bucket, bucket_drives, l=True, v=True):
     for key in bucket_drives.keys():
         if key == bucket:
             bucket_drive = bucket_drives[key]
-            log_msg("bucket drive %s" % bucket, "i", l, v)
+            log_msg("bucket drive {0!s}".format(bucket), "i", l, v)
             #print "[VALID] bucket drive %s" % bucket
     if not bucket_drive:
-        log_msg("bucket drive %s: No drive assigned" % bucket, "e", l, v)
+        log_msg("bucket drive {0!s}: No drive assigned".format(bucket), "e", l, v)
         #print "[FAILED} bucket drive %s: No drive assigned" % bucket
     return bucket_drive
 
 
 def validate_folder(folder, l=True, v=True):
     if os.path.exists(folder):
-        log_msg("folder %s" % folder, "i", l, v)
+        log_msg("folder {0!s}".format(folder), "i", l, v)
         #print "[VALID] folder %s" % folder
         return folder
     else:
-        log_msg("folder %s: does not exist" % folder, "e", l, v)
+        log_msg("folder {0!s}: does not exist".format(folder), "e", l, v)
         #print "[FAILED] folder %s: does not exist" % folder
         return False
 
@@ -102,15 +102,15 @@ def validate_shapefile(shp, l=True, v=True):
     if arcpy.Exists(shp):
         desc = arcpy.Describe(shp)
         if not desc.dataType == 'ShapeFile':
-            log_msg("shapefile %s: is not a Shapefile" % shp, "e", l, v)
+            log_msg("shapefile {0!s}: is not a Shapefile".format(shp), "e", l, v)
             #print "[FAILED] shapefile %s: is not a Shapefile" % shp
             return False
         else:
-            log_msg("shapefile %s" % shp, "i", l, v)
+            log_msg("shapefile {0!s}".format(shp), "i", l, v)
             #print "[VALID] shapefile %s" % shp
             return shp
     else:
-        log_msg("shapefile %s: does not exist" % shp, "e", l, v)
+        log_msg("shapefile {0!s}: does not exist".format(shp), "e", l, v)
         #print "[FAILED] shapefile %s: does not exist" % shp
         return False
 
@@ -122,15 +122,15 @@ def validate_gdb(gdb, l=True, v=True):
         print desc.dataType
         print desc.workspaceFactoryProgID
         if not desc.workspaceFactoryProgID == 'esriDataSourcesGDB.FileGDBWorkspaceFactory.1':
-            log_msg("gdb %s: is not a fileGDB" % gdb, "e", l, v)
+            log_msg("gdb {0!s}: is not a fileGDB".format(gdb), "e", l, v)
             #print "[FAILED] gdb %s: is not a fileGDB" % gdb
             return False
         else:
-            log_msg("gdb %s" % gdb, "i", l, v)
+            log_msg("gdb {0!s}".format(gdb), "i", l, v)
             #print "[VALID] gdb %s" % gdb
             return gdb
     else:
-        log_msg("gdb %s: does not exist" % gdb, "e", l, v)
+        log_msg("gdb {0!s}: does not exist".format(gdb), "e", l, v)
         #print "[FAILED] gdb %s: does not exist" % gdb
         return False
 
@@ -139,15 +139,15 @@ def validate_feature_class(fc, l=True, v=True):
     if arcpy.Exists(fc):
         desc = arcpy.Describe(fc)
         if not desc.dataType == 'FeatureClass':
-            log_msg("feature class %s: is not a Feature Class" % fc, "e", l, v)
+            log_msg("feature class {0!s}: is not a Feature Class".format(fc), "e", l, v)
             #print "[FAILED] feature class %s: is not a Feature Class" % fc
             return False
         else:
-            log_msg("feature class %s" % fc, "i", l, v)
+            log_msg("feature class {0!s}".format(fc), "i", l, v)
             #print "[VALID] feature class %s" % fc
             return fc
     else:
-        log_msg("feature class %s: does not exist" % fc, "e", l, v)
+        log_msg("feature class {0!s}: does not exist".format(fc), "e", l, v)
         #print "[FAILED] feature class %s: does not exist" % fc
         return False
 
@@ -155,10 +155,10 @@ def validate_feature_class(fc, l=True, v=True):
 def validate_where(fc, where, l=True, v=True):
     try:
         arcpy.MakeFeatureLayer_management(fc, where)
-        log_msg("where clause %s" % where, "i", l, v)
+        log_msg("where clause {0!s}".format(where), "i", l, v)
         #print "[VALID] where clause %s" % where
     except:
-        log_msg("where clause %s: is invalide" % where, "e", l, v)
+        log_msg("where clause {0!s}: is invalide".format(where), "e", l, v)
         #print "[FAILED] where clause %s: is invalide" % where
         log_info(arcpy.GetMessages(), l, v)
         #print arcpy.GetMessages()
@@ -177,11 +177,11 @@ def validate_transformation(fc, srs, transformation, l=True, v=True):
     #print transformations
 
     if not transformation in transformations:
-        log_msg("transformation %s: not compatible with in- and output spatial reference or extent" % transformation, "e", l, v)
+        log_msg("transformation {0!s}: not compatible with in- and output spatial reference or extent".format(transformation), "e", l, v)
         #print "[FAILD] transformation %s: not compatible with in- and output spatial reference or extent" % transformation
         return False
     else:
-        log_msg("transformation %s" % transformation, "i", l, v)
+        log_msg("transformation {0!s}".format(transformation), "i", l, v)
         #print "[VALID] transformation %s" % transformation
         return transformation
 
@@ -189,11 +189,11 @@ def validate_transformation(fc, srs, transformation, l=True, v=True):
 def validate_srs(srs, l=True, v=True):
     try:
         arcpy.SpatialReference(srs)
-        log_msg("srs %s" % srs, "i", l, v)
+        log_msg("srs {0!s}".format(srs), "i", l, v)
         #print "[VALID] srs %s" % srs
         return srs
     except:
-        log_msg("srs %s: not a spatial reference system" % srs, "e", l, v)
+        log_msg("srs {0!s}: not a spatial reference system".format(srs), "e", l, v)
         #print "[FAILED] srs %s: not a spatial reference system" % srs
         return False
 
@@ -216,30 +216,30 @@ def validate_fields(in_fc, out_fc, fields, l=True, v=True):
         if key in out_fc_flist:
             if fields[key][0] == 'field':
                 if not fields[key][1] in in_fc_flist:
-                    log_msg("field %s: does not exist in feature class %s" % (key, in_fc), "e", l, v)
+                    log_msg("field {0!s}: does not exist in feature class {1!s}".format(key, in_fc), "e", l, v)
                     #print "[FAILED] field %s: does not exist in feature class %s" % (key, in_fc)
                     e += 1
                 else:
-                    log_msg("field %s" % key, "i", l, v)
+                    log_msg("field {0!s}".format(key), "i", l, v)
                     #print "[VALID] field %s" % key
             elif fields[key][0] == 'value':
                 if len(fields[key][1])> 255:
-                    log_msg("field value for %s for feature class %s is too long" % (key, in_fc), "e", l, v)
+                    log_msg("field value for {0!s} for feature class {1!s} is too long".format(key, in_fc), "e", l, v)
                     #print "[FAILED] field value for %s for feature class %s is too long" % (key, in_fc)
                     e += 1
                 else:
-                    log_msg("field %s" % key, "i", l, v)
+                    log_msg("field {0!s}".format(key), "i", l, v)
                     #print "[VALID] field %s" % key
             elif fields[key][0] == 'expression':
                 # no test for expression at this point
-                log_msg("field %s: skip test (no validation routine for expressions)" % key, "w", l, v)
+                log_msg("field {0!s}: skip test (no validation routine for expressions)".format(key), "w", l, v)
                 #print "[WARNING] field %s: skip test (no validation routine for expressions)" % key
             else:
-                log_msg("field %s: invalide statement" % key, "e", l, v)
+                log_msg("field {0!s}: invalide statement".format(key), "e", l, v)
                 #print "[FAILED] field %s: invalide statement" % key
                 e += 1
         else:
-            log_msg("field %s: does not exist in feature class %s" % (key, out_fc), "e", l, v)
+            log_msg("field {0!s}: does not exist in feature class {1!s}".format(key, out_fc), "e", l, v)
             #print "[FAILED] field %s: does not exist in feature class %s" % (key, out_fc)
             e += 1
     if e == 0:
@@ -264,7 +264,7 @@ def print_dic_value(d, l=True, v=True):
 def validate_structure(ini_file, configspec, l=True, v=True):
 
     log_info("", l, v)
-    log_info("Validate file structure of %s" % ini_file, l, v)
+    log_info("Validate file structure of {0!s}".format(ini_file), l, v)
     #print ""
     #print "Validate file structure of %s" % ini_file
 
@@ -287,7 +287,7 @@ def validate_structure(ini_file, configspec, l=True, v=True):
             errors = errors + print_dic_value(results, l, v)
 
     except (ConfigObjError, IOError), e:
-        log_msg('Could not read "%s": %s' % (f, e), "e", l, v)
+        log_msg('Could not read "{0!s}": {1!s}'.format(f, e), "e", l, v)
         #print 'Could not read "%s": %s' % (f, e)
         errors += 1
 
@@ -326,7 +326,7 @@ def validate_settings(l=True, v=True):
 def validate_layer(ini_file, layer_name, countries, l=True, v=True):
 
     log_info("", l, v)
-    log_info("Validate parameters of %s" % ini_file, l, v)
+    log_info("Validate parameters of {0!s}".format(ini_file), l, v)
     #print ""
     #print "Validate parameters of %s" % ini_file
     
@@ -340,7 +340,7 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
         if l == layer_name:
 
             log_info("", l, v)
-            log_info("Layer %s" % layer_name, l, v)
+            log_info("Layer {0!s}".format(layer_name), l, v)
             #print ""
             #print "Layer %s" % key
             layer = layers[layer_name]
@@ -354,7 +354,7 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
                 if not fc:
                     errors += 1
             else:
-                log_msg("feature class %s: skipped" % layer_name, "w", l, v)
+                log_msg("feature class {0!s}: skipped".format(layer_name), "w", l, v)
                 #print "[WARNING] feature class %s: skipped" % layer_name
                 fc = False
                 errors += 1
@@ -368,7 +368,7 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
                 if not folder:
                     errors += 1
             else:
-                log_msg("folder %s: skipped" % layer['folder'], "w", l, v)
+                log_msg("folder {0!s}: skipped".format(layer['folder']), "w", l, v)
                 #print "[WARNING] folder %s: skipped" % layer['folder']
                 folder = False
                 errors += 1
@@ -389,16 +389,16 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
                             if not transformation:
                                 errors += 1
                     else:
-                        log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
-                        log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
+                        log_msg("where clause {0!s}: skipped".format(layer['where_clause']), "w", l, v)
+                        log_msg("transformation {0!s}: skipped".format(layer['transformation']), "w", l, v)
                         #print "[WARNING] where clause %s: skipped" % layer['where_clause']
                         #print "[WARNING] transformation %s: skipped" % layer['transformation']
                         errors += 1
                         warnings += 2
                 else:
-                    log_msg("shapefile %s: skipped" % layer['shapefile'], "w", l, v)
-                    log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
-                    log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
+                    log_msg("shapefile {0!s}: skipped".format(layer['shapefile']), "w", l, v)
+                    log_msg("where clause {0!s}: skipped".format(layer['where_clause']), "w", l, v)
+                    log_msg("transformation {0!s}: skipped".format(layer['transformation']), "w", l, v)
                     #print "[WARNING: shapefile %s: skipped" % layer['shapefile']
                     #print "[WARNING: where clause %s: skipped" % layer['where_clause']
                     #print "[WARNING: transformation %s: skipped" % layer['transformation']
@@ -409,7 +409,7 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
                         country_layer = layer['layers'][c_layer]
                         if country_layer["country"] in countries or not len(countries):
                             log_info("", l, v)
-                            log_info("Country layer %s" % c_layer, l, v)
+                            log_info("Country layer {0!s}".format(c_layer), l, v)
                             #print ""
                             #print "Country layer %s" % c_layer
                             country_layer = layer['layers'][c_layer]
@@ -434,8 +434,8 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
                                     #print "[WARNING] fields: skipped"
                                     warnings += 1
                             else:
-                                log_msg("where clause %s: skipped" % layer['where_clause'], "w", l, v)
-                                log_msg("transformation %s: skipped" % layer['transformation'], "w", l, v)
+                                log_msg("where clause {0!s}: skipped".format(layer['where_clause']), "w", l, v)
+                                log_msg("transformation {0!s}: skipped".format(layer['transformation']), "w", l, v)
                                 log_msg("fields: skipped", "w", l, v)
                                 #print "[WARNING: where clause %s: skipped" % layer['where_clause']
                                 #print "[WARNING: transformation %s: skipped" % layer['transformation']
@@ -446,7 +446,7 @@ def validate_layer(ini_file, layer_name, countries, l=True, v=True):
                     for c_layer in layer['layers']:
                         country_layer = layer['layers'][c_layer]
                         if country_layer["country"] in countries or not len(countries): 
-                            log_msg("country layer %s: skipped" % c_layer, "w", l, v)
+                            log_msg("country layer {0!s}: skipped".format(c_layer), "w", l, v)
                             #print "[WARNING] country layer %s: skipped" % c_layer
                             warnings += 1
 
@@ -463,7 +463,7 @@ def validate(layers, countries, l=True, v=True):
     log_folder = os.path.join(dir_name, "log")
     if not os.path.exists(log_folder):
         os.mkdir(log_folder)
-    log_name = os.path.join(log_folder, "validation_%s.log" % timestamp)
+    log_name = os.path.join(log_folder, "validation_{0!s}.log".format(timestamp))
     logging.basicConfig(filename=log_name,level=logging.INFO)
 
     errors = 0
@@ -494,9 +494,9 @@ def validate(layers, countries, l=True, v=True):
 
     print ""
     print ""
-    print "Validation ended with %i errors and %i warnings" % (errors, warnings)
+    print "Validation ended with {0:d} errors and {1:d} warnings".format(errors, warnings)
     if l:
-        print "See %s for details" % log_name
+        print "See {0!s} for details".format(log_name)
     print ""
     print ""
 

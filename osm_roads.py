@@ -20,7 +20,7 @@ def get_auth_key():
 def rerun_job(job_uid):
     authKey = get_auth_key()
     headers = {"Content-Type":"application/json", "Authorization":"Token " + authKey}
-    url = "http://export.hotosm.org/api/rerun?job_uid=%s" % job_uid
+    url = "http://export.hotosm.org/api/rerun?job_uid={0!s}".format(job_uid)
     request = urllib2.Request(url)
 
     for key, value in headers.items():
@@ -32,7 +32,7 @@ def rerun_job(job_uid):
 def get_job(job_uid):
     authKey = get_auth_key()
     headers = {"Content-Type":"application/json", "Authorization":"Token " + authKey}
-    url = "http://export.hotosm.org/api/runs?job_uid=%s" % job_uid
+    url = "http://export.hotosm.org/api/runs?job_uid={0!s}".format(job_uid)
 
     request = urllib2.Request(url)
 
@@ -50,7 +50,7 @@ job_uids = ["2c5d8ae4-940a-445b-b34a-0e922a40598c",
 
 
 for job_uid in job_uids:
-    print "rerun job %s" % job_uid
+    print "rerun job {0!s}".format(job_uid)
     rerun_job(job_uid)
 
 results = {}
@@ -71,7 +71,7 @@ while not done:
 
         if results[job_uid]["url"] is None:
 
-            print "get job %s" % job_uid
+            print "get job {0!s}".format(job_uid)
             data = json.load(get_job(job_uid))
 
             if data[0]['status'] == 'SUBMITTED':
@@ -85,7 +85,7 @@ while not done:
             else:
                 results[job_uid]["reruns"] += 1
                 if results[job_uid]["reruns"] > 4:
-                    print "fob %s failed" % job_uid
+                    print "fob {0!s} failed".format(job_uid)
 
                 else:
                     rerun_job(job_uid)
@@ -106,7 +106,7 @@ for job_uid in job_uids:
         if not os.path.exists(unzip_folder):
             os.mkdir(unzip_folder)
 
-        print "download job %s" % job_uid
+        print "download job {0!s}".format(job_uid)
         urllib.urlretrieve(results[job_uid]["url"], zip_path)
 
         with zipfile.ZipFile(zip_path, "r") as z:
