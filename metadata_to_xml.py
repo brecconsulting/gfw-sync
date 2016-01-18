@@ -19,9 +19,9 @@ gc = gspread.authorize(credentials)
 wks = gc.open("GFW Metadata Entry Form (Responses)").sheet1
 
 #determine row value based on technical name 
-print "searching for %s in metadata spreadsheet" %(filename)
+print "searching for {0!s} in metadata spreadsheet".format((filename))
 cell = wks.find(filename)
-print "file is in row %d" %cell.row
+print "file is in row {0:d}".format(cell.row)
 
 #define metadata variables that correspond to cells in the metadata spreadsheet 
 title = wks.cell(cell.row, 3).value

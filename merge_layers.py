@@ -32,7 +32,7 @@ def empty_strings2null(fclass):
     if desc.dataType == 'FeatureClass':
         string_fields = [f.name for f in arcpy.ListFields(fclass, None, 'String')]
         for string_field in string_fields:
-            arcpy.MakeFeatureLayer_management(fclass, "update_layer", '"%s" = \'\'' % string_field, "", "")
+            arcpy.MakeFeatureLayer_management(fclass, "update_layer", '"{0!s}" = \'\''.format(string_field), "", "")
             arcpy.CalculateField_management("update_layer", string_field, "None", "PYTHON", "")
 
 
@@ -52,9 +52,9 @@ def remove_features(fc, countries):
         where_clause = ""
         for country in countries:
             if where_clause == "":
-                where_clause = "country = '%s'" % country
+                where_clause = "country = '{0!s}'".format(country)
             else:
-                where_clause = "%s OR country = '%s'" % (where_clause, country)
+                where_clause = "{0!s} OR country = '{1!s}'".format(where_clause, country)
             arcpy.MakeFeatureLayer_management(fc, "layer", where_clause)
             arcpy.DeleteFeatures_management("layer")
 
@@ -115,7 +115,7 @@ def append_description_element(desc, attrib, layer_name, text):
     root = ET.fromstring(desc)
     for element in root.findall("DIV"):
         if not len(element.attrib):
-            desc_element = ET.fromstring("<DIV><H3>%s</H3>%s</DIV>" % (layer_name, text))
+            desc_element = ET.fromstring("<DIV><H3>{0!s}</H3>{1!s}</DIV>".format(layer_name, text))
             desc_element.attrib['ID'] = attrib
             element.append(desc_element)
             break
@@ -201,11 +201,11 @@ def merge(layers, countries):
         layer_def = get_layer_def(layer_name, layer_defs)
 
         if not layer_def:
-            print "Layer %s is not defined. Skip" % layer_name
+            print "Layer {0!s} is not defined. Skip".format(layer_name)
             break
 
         print ""
-        print "Merge %s" % layer_name
+        print "Merge {0!s}".format(layer_name)
         print ""
         print "Define layer parameters"
         gdb = os.path.join(workspace, layer_def['gdb'])
@@ -240,7 +240,7 @@ def merge(layers, countries):
             if layer['country'] in countries or not len(countries):
 
                 print ""
-                print "Add %s" % layer['alias']
+                print "Add {0!s}".format(layer['alias'])
                 print ""
 
                 print "Make local copy"
@@ -284,12 +284,12 @@ def merge(layers, countries):
                     if layer['fields'][field]:
 
                         if layer['fields'][field][0].lower() == 'value':
-                            arcpy.CalculateField_management(target_layer, field, "'%s'" % layer['fields'][field][1], "PYTHON", "")
+                            arcpy.CalculateField_management(target_layer, field, "'{0!s}'".format(layer['fields'][field][1]), "PYTHON", "")
 
                         elif layer['fields'][field][0].lower() == 'expression':
-                            arcpy.CalculateField_management(target_layer, field, "%s" % layer['fields'][field][1], "PYTHON", "")
+                            arcpy.CalculateField_management(target_layer, field, "{0!s}".format(layer['fields'][field][1]), "PYTHON", "")
 
-                arcpy.CalculateField_management(target_layer, "country", "'%s'" % layer['country'], "PYTHON", "")
+                arcpy.CalculateField_management(target_layer, "country", "'{0!s}'".format(layer['country']), "PYTHON", "")
 
                 #convert empty strings ('') to NULL
                 empty_strings2null(target_fc)
