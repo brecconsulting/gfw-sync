@@ -13,7 +13,7 @@ def get_auth_key():
 
 def cartodb_sql(sql):
     key = get_auth_key()
-    return urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key=%s&q=%s" % (key, sql))
+    return urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key={0!s}&q={1!s}".format(key, sql))
 
     
 def cartodb_push(file_name):
@@ -43,19 +43,19 @@ def update_cartodb(shp, production_table):
     cartodb_push(shp)
     
     print "repair geometry"
-    sql = 'UPDATE %s SET the_geom = ST_MakeValid(the_geom), the_geom_webmercator = ST_MakeValid(the_geom_webmercator) WHERE ST_IsValid(the_geom) = false' % staging_table
+    sql = 'UPDATE {0!s} SET the_geom = ST_MakeValid(the_geom), the_geom_webmercator = ST_MakeValid(the_geom_webmercator) WHERE ST_IsValid(the_geom) = false'.format(staging_table)
     cartodb_sql(sql)
 
     print "push to production"
-    sql= 'TRUNCATE %s; INSERT INTO %s SELECT * FROM %s; COMMIT' % (production_table, production_table, staging_table)
+    sql= 'TRUNCATE {0!s}; INSERT INTO {1!s} SELECT * FROM {2!s}; COMMIT'.format(production_table, production_table, staging_table)
     cartodb_sql(sql)
     
     print "update layer spec max date"
-    sql = "UPDATE %s set maxdate= (SELECT max(date)+1 FROM %s) WHERE table_name='%s'" % (layerspec_table, production_table, production_table )
+    sql = "UPDATE {0!s} set maxdate= (SELECT max(date)+1 FROM {1!s}) WHERE table_name='{2!s}'".format(layerspec_table, production_table, production_table )
     cartodb_sql(sql)
 
     print "delete staging"
-    sql= 'DROP TABLE IF EXISTS %s CASCADE' % staging_table
+    sql= 'DROP TABLE IF EXISTS {0!s} CASCADE'.format(staging_table)
     cartodb_sql(sql)
 
 if __name__ == "__main__":

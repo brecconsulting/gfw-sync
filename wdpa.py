@@ -24,7 +24,7 @@ def download_wdpa(url, wdpa, path):
 		shutil.rmtree(wdpa_path)
 		os.mkdir(wdpa_path)
 		
-	zip_name = "%s.zip" % wdpa
+	zip_name = "{0!s}.zip".format(wdpa)
 	zip_path = os.path.join(wdpa_path, zip_name)
 	
 	urllib.urlretrieve(url, zip_path)
