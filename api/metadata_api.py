@@ -94,9 +94,9 @@ def rebuild_cache(f):
                     cache.write(u', ')
 
                 if field in ['title', 'translated_title', 'subtitle', 'tags', 'learn_more_or_download_data']:
-                    cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p>', u'').replace(u'</p>', u'').strip()))
+                    cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p>', u'').replace(u'</p>', u'').strip()))
                 else:
-                    cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p></p>', u'').strip()))
+                    cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p></p>', u'').strip()))
 
                 j += 1
             cache.write(u'}')
