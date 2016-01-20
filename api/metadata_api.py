@@ -92,7 +92,10 @@ def rebuild_cache(f):
             for field in md[layer].keys():
                 if j > 0:
                     cache.write(u', ')
-                cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n',u'')))
+                if field in ['title', 'translated_title', 'subtitle', 'tags', 'learn_more_or_download_data']:
+                    cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p>', u'').replace(u'</p>', u'').strip()))
+                else:
+                    cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p></p>', u'').strip()))
                 j += 1
             cache.write(u'}')
 
@@ -133,6 +136,8 @@ def print_json():
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
+                with open(cache_file) as cache:
+                    data = cache.read()
                 print data
 
             else:
@@ -146,6 +151,7 @@ def print_json():
                     print {"error": "Layer %s unknown" % layer}
         else:
             print {"error": "wrong argument"}
+
 
 
 print_json()
