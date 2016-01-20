@@ -60,7 +60,7 @@ def download_zipfile(url, output_dir):
 
     r = requests.get(url, stream=True)
 
-    print "Downloading %s" % url
+    print "Downloading {0!s}".format(url)
     with open(path, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             f.write(chunk)
@@ -95,13 +95,13 @@ def mirror_sad_files(url, sad_folder, mindate=None, test=False):
     for url in urls:
         sad_file = make_path(sad_folder, url)
         if not 'http://' in url:
-            url = 'http://imazongeo.org.br%s' % url
+            url = 'http://imazongeo.org.br{0!s}'.format(url)
         if not os.path.exists(sad_file):
-            print "Download from %s" % url
+            print "Download from {0!s}".format(url)
             z = download_zipfile(url, sad_folder)
             uploaded.append(sad_file)
         else:
-            print 'File already exists at %s' % (sad_file)
+            print 'File already exists at {0!s}'.format((sad_file))
 
     return uploaded
  
@@ -159,9 +159,9 @@ def append_to_imazon_sad(input_shp, target_fc):
     print int(counts.getOutput(0))
 
     print "update fields"
-    arcpy.CalculateField_management(target_layer, "date", "'%s'" % date_obj.strftime("%m/%d/%Y"), "PYTHON")
-    arcpy.CalculateField_management(target_layer, "data_type", "'%s'" % data_type, "PYTHON")
-    arcpy.CalculateField_management(target_layer, "orig_fname", "'%s'" % fname, "PYTHON")
+    arcpy.CalculateField_management(target_layer, "date", "'{0!s}'".format(date_obj.strftime("%m/%d/%Y")), "PYTHON")
+    arcpy.CalculateField_management(target_layer, "data_type", "'{0!s}'".format(data_type), "PYTHON")
+    arcpy.CalculateField_management(target_layer, "orig_fname", "'{0!s}'".format(fname), "PYTHON")
     arcpy.CalculateField_management(target_layer, "gfwid", "!globalid![1:-1]", "PYTHON")
     
 def update_imazon_sad():
@@ -174,7 +174,7 @@ def update_imazon_sad():
     log_folder = os.path.join(dir_name, "log")
     if not os.path.exists(log_folder):
         os.mkdir(log_folder)
-    log_name = os.path.join(log_folder, "imazon_sad_%s.log" % timestamp)
+    log_name = os.path.join(log_folder, "imazon_sad_{0!s}.log".format(timestamp))
     logging.basicConfig(filename=log_name,level=logging.INFO)
 
     logging.info("Start application")
@@ -205,7 +205,7 @@ def update_imazon_sad():
     arcpy.env.outputCoordinateSystem = arcpy.SpatialReference(gdb_srs)
 
     for zf in zipfiles:
-        logging.info("Append %s" %zf)
+        logging.info("Append {0!s}".format(zf))
         bname = os.path.basename(zf)
         fpath = os.path.join(scratch_folder, bname)
         shutil.copy(zf, fpath)

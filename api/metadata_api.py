@@ -87,15 +87,17 @@ def rebuild_cache(f):
         for layer in md.keys():
             if i > 0:
                 cache.write(u', ')
-            cache.write(u'"%s": {' % layer)
+            cache.write(u'"{0!s}": {{'.format(layer))
             j = 0
             for field in md[layer].keys():
                 if j > 0:
                     cache.write(u', ')
+
                 if field in ['title', 'translated_title', 'subtitle', 'tags', 'learn_more_or_download_data']:
                     cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p>', u'').replace(u'</p>', u'').strip()))
                 else:
                     cache.write(u'"%s": "%s"' % (field, markdown2.markdown(md[layer][field]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p></p>', u'').strip()))
+
                 j += 1
             cache.write(u'}')
 
@@ -129,10 +131,10 @@ def print_json():
                 data = cache.read()
             print data
 
-        elif os.path.dirname(sys.argv[1]) == dir_name or sys.argv[1] == '%s\\metadata\\' % dir_name:
+        elif os.path.dirname(sys.argv[1]) == dir_name or sys.argv[1] == '{0!s}\\metadata\\'.format(dir_name):
             print data
 
-        elif os.path.dirname(sys.argv[1]) == r'%s\metadata' % dir_name:
+        elif os.path.dirname(sys.argv[1]) == r'{0!s}\metadata'.format(dir_name):
             layer = os.path.basename(sys.argv[1])
             if layer == 'rebuild_cache':
                 rebuild_cache(cache_file)
@@ -141,14 +143,14 @@ def print_json():
                 print data
 
             else:
-                if udata.find(u'"%s":' % layer) != -1:
-                    start = udata.find(u'"%s":' % layer) + len(u'"%s":' % layer)
+                if udata.find(u'"{0!s}":'.format(layer)) != -1:
+                    start = udata.find(u'"{0!s}":'.format(layer)) + len(u'"{0!s}":'.format(layer))
                     end = udata[start:].find(u'}') + start + 1
 
                     output = udata[start:end].encode('utf8').strip()
                     print output
                 else:
-                    print {"error": "Layer %s unknown" % layer}
+                    print {"error": "Layer {0!s} unknown".format(layer)}
         else:
             print {"error": "wrong argument"}
 

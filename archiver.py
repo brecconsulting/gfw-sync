@@ -56,7 +56,7 @@ def zip_shapefile(shp, dst, local):
 
 def archive_shapefile(shp_path, zip_folder, dst_folder=None, arc_folder=None, local=False):
 
-    print 'Zip %s' % shp_path
+    print 'Zip {0!s}'.format(shp_path)
 
     zip_name = zip_shapefile(shp_path, zip_folder, local)
     src = os.path.join(zip_folder, zip_name)
@@ -65,7 +65,7 @@ def archive_shapefile(shp_path, zip_folder, dst_folder=None, arc_folder=None, lo
         if not os.path.exists(dst_folder):
             os.mkdir(dst_folder)
         dst = os.path.join(dst_folder, zip_name)
-        print "Copy ZIP to %s" % dst_folder
+        print "Copy ZIP to {0!s}".format(dst_folder)
         #print src
         #print dst
         shutil.copy(src, dst)
@@ -75,9 +75,9 @@ def archive_shapefile(shp_path, zip_folder, dst_folder=None, arc_folder=None, lo
             os.mkdir(arc_folder)
         ts = time.time()
         timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S')
-        dst = os.path.join(arc_folder, "%s_%s.zip" % (os.path.splitext(zip_name)[0], timestamp))
+        dst = os.path.join(arc_folder, "{0!s}_{1!s}.zip".format(os.path.splitext(zip_name)[0], timestamp))
         #dst = os.path.join(arc_folder, zip_name)
-        print "Copy archived ZIP to %s" % arc_folder
+        print "Copy archived ZIP to {0!s}".format(arc_folder)
         #print src
         #print dst
         shutil.copy(src, dst)
