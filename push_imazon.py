@@ -18,7 +18,7 @@ def cartodb_sql(sql, raise_error=True):
     result = urllib.urlopen("http://wri-01.cartodb.com:80/api/v2/sql?api_key={0!s}&q={1!s}".format(key, sql))
     json_result = json.loads(result.readlines()[0])
     if raise_error and  "error" in json_result.keys():
-        raise SyntaxError("Wrong SQL syntax.\n %s" %json_result['error'])
+        raise SyntaxError("Wrong SQL syntax.\n {0!s}".format(json_result['error']))
     return json_result
 
 
