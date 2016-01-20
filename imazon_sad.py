@@ -182,7 +182,7 @@ def update_imazon_sad():
     sad_folder = r"F:\forest_change\imazon_sad"
     url = 'http://www.imazongeo.org.br/doc/downloads.php'
     scratch_folder = r"D:\GIS Data\GFW\temp"
-    gdb = r"D:\scripts\connections\gfw (localhost).sde\forest_change"
+    gdb = r"D:\scripts\connections\gfw (gfw@localhost).sde\forest_change"
     fc = "imazon_sad"
     default_srs = "WGS 1984"
     gdb_srs = 'WGS 1984 Web Mercator (auxiliary sphere)'
