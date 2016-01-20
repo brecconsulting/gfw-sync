@@ -48,7 +48,7 @@ def replace_wdpa_data(src_gdb, dst_gdb, wdpa_fc, sde_gdb):
 
             ##delete all features
             arcpy.DeleteFeatures_management(dst_fc)
-            arcpy.Compress_management(sde_gdb)
+            #arcpy.Compress_management(sde_gdb)
 
             ##load new data
             arcpy.Append_management(src_fc, dst_fc, "NO_TEST")
