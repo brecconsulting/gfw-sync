@@ -64,7 +64,7 @@ def get_metadata(wks, row):
     md[u"cautions"] = wks.cell(row, 10).value
     md[u"source"] = wks.cell(row, 7).value
     md[u"resolution"] = wks.cell(row, 5).value
-    md[u"learn_more_or_download_data"] = wks.cell(row, 21).value
+    md[u"learn_more_or_download_data"] = wks.cell(row, 20).value
     md[u"other"] = wks.cell(row, 35).value
     md[u"subtitle"] = wks.cell(row, 36).value
 
@@ -94,9 +94,9 @@ def rebuild_cache(f):
                     cache.write(u', ')
 
                 if field in ['title', 'translated_title', 'subtitle', 'tags', 'learn_more_or_download_data']:
-                    cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field], extras=["code-friendly"]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p>', u'').replace(u'</p>', u'').strip()))
+                    cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field], extras=["code-friendly"]).strip().replace('"', '\\"').replace(u'\n', u'<br>').replace(u'</p><br>', u'</p>').replace(u'<br><p>', u'<p>').replace(u'<p>', u'').replace(u'</p>', u'')))
                 else:
-                    cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field], extras=["code-friendly"]).replace('"', '\\"').replace(u'\n', u'').replace(u'<p></p>', u'').strip()))
+                    cache.write(u'"{0!s}": "{1!s}"'.format(field, markdown2.markdown(md[layer][field], extras=["code-friendly"]).strip().replace('"', '\\"').replace(u'\n', u'<br>').replace(u'</p><br>', u'</p>').replace(u'<br><p>', u'<p>').replace(u'<p></p>', u'')))
 
                 j += 1
             cache.write(u'}')
