@@ -64,10 +64,11 @@ def get_metadata(wks, row):
     md[u"cautions"] = wks.cell(row, 10).value
     md[u"source"] = wks.cell(row, 7).value
     md[u"resolution"] = wks.cell(row, 5).value
-    md[u"learn_more_or_download_data"] = wks.cell(row, 20).value
+    md[u"download_data"] = wks.cell(row, 20).value
     md[u"other"] = wks.cell(row, 35).value
     md[u"subtitle"] = wks.cell(row, 36).value
     md[u"translated_function"] = wks.cell(row, 15).value
+	md[u"learn_more"] = wks.cell(row, 37).value
 
     return md
 
