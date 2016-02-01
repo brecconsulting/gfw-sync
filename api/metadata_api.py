@@ -68,7 +68,7 @@ def get_metadata(wks, row):
     md[u"other"] = wks.cell(row, 35).value
     md[u"subtitle"] = wks.cell(row, 36).value
     md[u"translated_function"] = wks.cell(row, 15).value
-	md[u"learn_more"] = wks.cell(row, 37).value
+    md[u"learn_more"] = wks.cell(row, 37).value
 
     return md
 
