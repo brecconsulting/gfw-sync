@@ -8,17 +8,19 @@ import os
 from archiver import *
 from datetime import date
 
-destination_latest_raster = r'C:\Users\samantha.gibbes\Documents\gis\terraI'
+'''Create zipped raster in s3 for visualization'''
+
+destination_latest_raster = r'F:\forest_change\terra_i_alerts'
 name_latest_raster= "latest_raster.tif"
-zip_folder = r'C:\Users\samantha.gibbes\Documents\gis\terraI\zipfolder'
+zip_folder = r'F:\forest_change\terra_i_alerts\zip'
 
 print "downloading latest file"
 latest_raster = os.path.join(destination_latest_raster,name_latest_raster)
 terrai_file = urllib.urlretrieve("http://www.terra-i.org/data/current/raster/latin_decrease_current.tif",
                                           latest_raster)
 print "archive current raster"
-current_raster = r'/'
-archive_directory = r'/'
+current_raster = r'F:\forest_change\terra_i_alerts\latin_decrease_current.tif'
+archive_directory = r'F:\forest_change\terra_i_alerts\archive'
 prefix =  date.fromtimestamp(time.time()).strftime("%m%d%y")
 
 def zip_raster(rst, dst):
