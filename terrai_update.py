@@ -8,7 +8,7 @@ import os
 from archiver import *
 from datetime import date
 
-'''Create zipped raster in s3 for visualization'''
+'''Create zipped, unzipped, and archived raster in s3 for visualization.'''
 
 destination_latest_raster = r'F:\forest_change\terra_i_alerts'
 name_latest_raster= "latest_raster.tif"
@@ -34,3 +34,5 @@ def zip_raster(rst, dst):
         add_to_zip(rst, zf)
     zf.close()
 zip_raster(latest_raster,zip_folder)
+
+'''replace raster on R drive for analysis'''
