@@ -24,7 +24,7 @@ def zip_raster(rst, dst):
         add_to_zip(rst, zf)
     zf.close()
 
-destination_latest_raster = r'F:\forest_change\terra_i_alerts'
+destination_latest_raster = r'F:\forest_change\terra_i_alerts\blank'
 zip_folder = r'F:\forest_change\terra_i_alerts\zip'
 archive_directory = r'F:\forest_change\terra_i_alerts\archive'
 
