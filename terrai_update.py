@@ -33,8 +33,8 @@ basename = "latest_raster.tif"
 
 
 latest_raster = os.path.join(destination_latest_raster,basename)
-existing = glob.glob(os.path.join(destination_latest_raster,"*"))
-
+existing = glob.glob(os.path.join(destination_latest_raster,basename + "*"))
+print existing
 if len(existing) == 1:
     for i in existing:
 ##        print "archiving old raster"

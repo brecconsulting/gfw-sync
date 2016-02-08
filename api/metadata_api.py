@@ -157,5 +157,5 @@ def print_json():
             print {"error": "wrong argument"}
 
 
-
-print_json()
+if __name__ == "__main__":
+    print_json()

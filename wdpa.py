@@ -6,11 +6,58 @@ import shutil
 import arcpy
 import archiver
 import settings
+import api.metadata_api as MD
+
 
 
 def unzip(source_filename, dest_dir):
     with zipfile.ZipFile(source_filename) as zf:
         zf.extractall(dest_dir)
+
+
+def get_id_list(out_table):
+
+    cur = arcpy.SearchCursor(out_table)
+    ids = list()
+    for row in cur:
+        ids.append(row.getValue("FEATURE_ID"))
+
+    print "{0} gemetries to fix".format(len(ids))
+
+    if len(ids) == 0:
+        return 0, None
+    elif len(ids) == 1:
+        return 1, ids[0]
+    else:
+        i = 0
+        for id in ids:
+            if i == 0:
+                id_list = "({0}".format(id)
+                i += 1
+            else:
+                id_list = "{0}, {1}".format(id_list, id)
+
+        id_list = "{0})".format(id_list)
+        return 2, id_list
+
+
+def repair_geometry(fc):
+    arcpy.env.overwriteOutput = True
+    gdb = os.path.dirname(fc)
+    out_table = os.path.join(gdb, "invalid_geometries")
+    #arcpy.CheckGeometry_management(fc, out_table)
+    arcpy.RepairGeometry_management(fc, "DELETE_NULL")
+    #
+    # for i in range(5):
+    #     geoms, ids = get_id_list(out_table)
+    #     if geoms == 0:
+    #         break
+    #     elif geoms == 1:
+    #         arcpy.MakeFeatureLayer_management(fc, 'fix_geoms', '"{0}" = {1}'.format(arcpy.Describe(fc).OIDFieldName, ids))
+    #     else:
+    #         arcpy.MakeFeatureLayer_management(fc, 'fix_geoms', '"{0}" IN {1}'.format(arcpy.Describe(fc).OIDFieldName, ids))
+    #     arcpy.RepairGeometry_management("fix_geoms", "DELETE_NULL")
+    #     arcpy.CheckGeometry_management("fix_geoms", out_table)
 
 
 def download_wdpa(url, wdpa, path):
@@ -35,7 +82,7 @@ def download_wdpa(url, wdpa, path):
                 return os.path.join(root, dir)
 
 
-def replace_wdpa_data(src_gdb, dst_gdb, wdpa_fc, sde_gdb):
+def get_wdpa_fc(src_gdb):
     arcpy.env.workspace = src_gdb
     fc_list = arcpy.ListFeatureClasses()
 
@@ -43,7 +90,16 @@ def replace_wdpa_data(src_gdb, dst_gdb, wdpa_fc, sde_gdb):
 
         desc = arcpy.Describe(fc)
         if desc.shapeType == 'Polygon':
-            src_fc = os.path.join(src_gdb, fc)
+            return os.path.join(src_gdb, fc)
+        else:
+            return None
+
+
+def replace_wdpa_data(src_gdb, dst_gdb, wdpa_fc, sde_gdb):
+    arcpy.env.workspace = src_gdb
+    src_fc = get_wdpa_fc(src_gdb)
+    if src_fc is not None:
+
             dst_fc = os.path.join(dst_gdb, wdpa_fc)
 
             ##delete all features
@@ -89,6 +145,10 @@ def wdpa():
     src_gdb = download_wdpa(url, wdpa, path)
     print src_gdb
 
+    print "Repair geometry"
+    src_fc = get_wdpa_fc(src_gdb)
+    repair_geometry(src_fc)
+
     # src_gdb = os.path.join(path,"%s.gdb" % wdpa) #download_wdpa(url, wdpa, path)
     dst_gdb = r"D:\scripts\connections\gfw (gfw@localhost).sde\conservation"
     sde_gdb = r"D:\scripts\connections\gfw (sde@localhost).sde.sde"
@@ -115,6 +175,15 @@ def wdpa():
     print "copy shp to s3"
     s3_shp = os.path.join(layer_folder, wdpa_fc + ".shp")
     arcpy.Copy_management(dst, s3_shp)
+
+    print "Update metadata"
+    wks = MD.open_spreadsheet()
+    layers = MD.get_layer_names(wks)
+    i = 1
+    for layer in layers:
+        i += 1
+        if layer == "wdpa_protected_areas":
+            wks.update_cell(i, 8, 'Monthly. Current version: {0} {1}'.format(src_fc[-7:-4], src_fc[-4:]))
 
 
 if __name__ == "__main__":
