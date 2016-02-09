@@ -170,7 +170,7 @@ def wdpa():
     zip_folder = os.path.join(layer_folder, sets['folders']['zip_folder'])
     archive_folder = os.path.join(layer_folder, sets['folders']['archive_folder'])
 
-    archiver.archive_shapefile(dst, path, zip_folder, archive_folder, True)
+    archiver.archive_shapefile(dst, path, zip_folder, archive_folder, False)
 
     print "copy shp to s3"
     s3_shp = os.path.join(layer_folder, wdpa_fc + ".shp")
