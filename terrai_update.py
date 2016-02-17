@@ -1,7 +1,7 @@
-''' author: Sam Gibbes
-date: 2/1/16
+''' author: Sam Gibbes and Asa Strong
+date: 2/2016
 '''
-
+import arcpy
 import datetime, time
 import urllib
 import os
@@ -9,8 +9,58 @@ from archiver import *
 from datetime import date
 import glob
 
+#enable extentions and overwrite permissions
+arcpy.CheckOutExtension("Spatial")
+arcpy.env.overwriteOutput = True
 
-'''Create zipped, unzipped, and archived raster in s3 for visualization.'''
+#Download the data from stable url and add to R Drive
+def download_data():
+    print "downloading data"
+    url = r"http://www.terra-i.org/data/current/raster/latin_decrease_current.tif"
+    file_name = url.split("/")[-1]
+    path = "R:\\"
+    path_var = os.path.join(path, file_name)
+    urllib.urlretrieve(url,path_var)
+    print "Terra_I Downloaded to R drive"
+    build_table()
+
+#Build attribute table/add field/calculate field
+def build_table():
+    print "building attribute table"
+    raster = "R:\\latin_decrease_current.tif"
+    arcpy.BuildRasterAttributeTable_management(raster, "Overwrite")
+    arcpy.AddField_management(raster, "date", "TEXT")
+    print "attribute table built"
+    calculate_date()
+
+def calculate_date():
+    print "calculating dates"
+    raster = "R://latin_decrease_current.tif"
+    fields = ['Value','date']
+    with arcpy.da.UpdateCursor(raster,fields) as cursor:
+        for row in cursor:
+            gridcode = row[0]
+            year = 2004+int((gridcode)/23)
+            year_format = datetime.datetime.strptime(str(year) +"/01/01",'%Y/%m/%d')
+            days = datetime.timedelta(days=(gridcode%23)*16)
+            date_formatted= (year_format+days).strftime('%m/%d/%Y')
+            row[1]=date_formatted
+            cursor.updateRow(row)
+            print "dates calculated"
+
+#call function 1 through 3
+download_data()
+
+#optional function to Reproject the data to equal area in the R:/analysis folder
+'''def reproject_data():
+    print "reprojecting data"
+    input = "R:\\latin_decrease_current.tif"
+    output = "R:\\analysis\\terra_i.tif"
+    prj = "R:\\analysis\\terra_i\\prj.adf"
+    arcpy.ProjectRaster_management(input, output, prj)
+    print "Terra_I Reproject to R:/analysis folder"'''
+
+#Create zipped, unzipped, and archived raster in s3 for visualization.
 
 def zip_raster(rst, dst):
     basepath, fname, base_fname = gen_paths(rst)
@@ -50,9 +100,6 @@ if len(zips)>0:
     for z in zips:
         os.remove(z)
 ##print "downloading latest raster"
-terrai_file = urllib.urlretrieve("http://www.terra-i.org/data/current/raster/latin_decrease_current.tif",
-                                          latest_raster)
+terrai_file = "R://latin_decrease_current.tif"
 ##print "zip latest raster"
 zip_raster(latest_raster,zip_folder)
-
-'''replace raster on R drive for analysis'''
