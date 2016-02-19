@@ -27,7 +27,7 @@ def open_spreadsheet():
     abspath = os.path.abspath(__file__)
     dir_name = os.path.dirname(abspath)
     spreadsheet_file = os.path.join(dir_name, 'spreadsheet.json')
-    
+
     json_key = json.load(open(spreadsheet_file))
     scope = ['https://spreadsheets.google.com/feeds']
     credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
@@ -46,7 +46,7 @@ def get_layer_names(wks):
 
 def get_metadata(wks, row):
 
-    #define metadata variables that correspond to cells in the metadata spreadsheet 
+    #define metadata variables that correspond to cells in the metadata spreadsheet
     md = {}
     md[u"title"] = wks.cell(row, 3).value
     md[u"translated_title"] = wks.cell(row, 14).value
@@ -69,6 +69,7 @@ def get_metadata(wks, row):
     md[u"subtitle"] = wks.cell(row, 36).value
     md[u"translated_function"] = wks.cell(row, 15).value
     md[u"learn_more"] = wks.cell(row, 37).value
+    md[u"agol_id"] = wks.cell(row, 38).value
 
     return md
 
@@ -113,7 +114,7 @@ def print_json():
     abspath = os.path.abspath(__file__)
     dir_name = os.path.dirname(abspath)
     cache_file = os.path.join(dir_name, 'cache.json')
-    
+
     with open(cache_file) as cache:
         data = cache.read()
 
