@@ -50,8 +50,10 @@ def calculate_date():
 def export_shp():
     print "sending points to S3"
     input = "R://latin_decrease_current.tif"
-    output = "F://forest_change//terra_i_alerts//terra_i.shp"
+    output = "D:\\temp\\terra_i\\terra_i.shp"
+    s3 = "F:\\forest_change\\terra_i_alerts\\terra_i.shp"
     arcpy.RasterToPoint_conversion(input, output, "date")
+    arcpy.Copy_management(output, s3)
     print "points uploaded to S3"
 
 #Zip file in S3
@@ -96,9 +98,15 @@ def zip_shapefile(shp, dst):
 
     return zip_name
 
-shp = "F://forest_change//terra_i_alerts//terra_i.shp"
-dst = "F://forest_change//terra_i_alerts//zip"
+shp = "D:\\temp\\terra_i\\terra_i.shp"
+dst = "D:\\temp\\terra_i\\zip"
+
+def copy_zip():
+    src = "F://forest_change//terra_i_alerts//zip//terra_i.zip"
+    s3_zip = "F://forest_change//terra_i_alerts//zip//terra_i.zip"
+    shutil.copy(src,s3_zip)
 
 #call functions
 download_data()
 zip_shapefile(shp, dst)
+copy_zip()
