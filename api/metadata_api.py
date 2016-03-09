@@ -71,6 +71,8 @@ def get_metadata(wks, row):
     md[u"learn_more"] = wks.cell(row, 37).value
     md[u"agol_id"] = wks.cell(row, 38).value
     md[u"amazon_link"] = wks.cell(row, 21).value
+    md[u"map_service"] = wks.cell(row, 22).value
+    md[u"sql_api"] = wks.cell(row, 39).value
 
     return md
 
