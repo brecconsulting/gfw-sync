@@ -11,6 +11,30 @@ from oauth2client.client import SignedJwtAssertionCredentials
 import io
 import markdown2
 
+lkpColName_to_mdName = {'Map Service URL': u'map_service', 
+                        'Title': u'title', 
+                        'Source': u'source', 
+                        'Other': u'other', 
+                        'ArcGIS Online Item ID': u'agol_id', 
+                        'Function': u'function', 
+                        'SQL API': u'sql_api', 
+                        'Tags': u'tags', 
+                        'Translated Overview': u'translated_overview', 
+                        'Link to Data in Amazon S3': u'amazon_link', 
+                        'Download Data': u'download_data', 
+                        'License': u'license', 
+                        'Resolution': u'resolution', 
+                        'Geographic Coverage': u'geographic_coverage', 
+                        'Cautions': u'cautions', 
+                        'Subtitle': u'subtitle', 
+                        'Overview': u'overview', 
+                        'Citation': u'citation', 
+                        'Translated Title': u'translated_title', 
+                        'Translated Function': u'translated_function', 
+                        'Learn More': u'learn_more', 
+                        'Frequency of Updates': u'frequency_of_updates', 
+                        'Date of Content': u'date_of_content'}
+
 def byteify(input):
     if isinstance(input, dict):
         return {byteify(key): byteify(value) for key, value in input.iteritems()}
@@ -39,53 +63,52 @@ def open_spreadsheet():
     #wks = gc.open("GFW Metadata Entry Form (Responses)").sheet1
     wks = gc.open_by_key("1hJ48cMrADMEJ67L5hTQbT5hhV20YCJHpN1NwjXiC3pI").sheet1
 
-    return wks
+    gdocAsLists = wks.get_all_values()
 
-def get_layer_names(wks):
-    return wks.col_values(2)[1:]
+    return gdocAsLists
 
-def get_metadata(wks, row):
+def gdoc_lists_to_layer_dict(inGdocAsLists):
 
-    #define metadata variables that correspond to cells in the metadata spreadsheet
+    #Create emtpy metadata dictionary
     md = {}
-    md[u"title"] = wks.cell(row, 3).value
-    md[u"translated_title"] = wks.cell(row, 14).value
-    md[u"function"] = wks.cell(row, 4).value
-    md[u"overview"] = wks.cell(row, 12).value
-    md[u"translated_overview"] = wks.cell(row, 16).value
-    #md["category"] = wks.cell(row, 10).value
-    md[u"tags"] = wks.cell(row, 17).value #.value.split(", ")
-    md[u"geographic_coverage"] = wks.cell(row, 6).value
-    md[u"date_of_content"] = wks.cell(row, 9).value
-    md[u"frequency_of_updates"] = wks.cell(row, 8).value
-    #md["credits"] = wks.cell(row, 18).value
-    md[u"citation"] = wks.cell(row, 13).value
-    md[u"license"] = wks.cell(row, 11).value
-    md[u"cautions"] = wks.cell(row, 10).value
-    md[u"source"] = wks.cell(row, 7).value
-    md[u"resolution"] = wks.cell(row, 5).value
-    md[u"download_data"] = wks.cell(row, 20).value
-    md[u"other"] = wks.cell(row, 35).value
-    md[u"subtitle"] = wks.cell(row, 36).value
-    md[u"translated_function"] = wks.cell(row, 15).value
-    md[u"learn_more"] = wks.cell(row, 37).value
-    md[u"agol_id"] = wks.cell(row, 38).value
-    md[u"amazon_link"] = wks.cell(row, 21).value
-    md[u"map_service"] = wks.cell(row, 22).value
-    md[u"sql_api"] = wks.cell(row, 39).value    
+
+    #Pull the header row from the Google doc
+    headerRow = inGdocAsLists[0]
+
+    #Iterate over the remaining data rows
+    for dataRow in inGdocAsLists[1:]:
+
+        #Build a dictionary for each row with the column title
+        #as the key and the value of that row as the value
+        rowAsDict = {k: v for (k, v) in zip(headerRow, dataRow)}
+
+        #Grab the technical title (what we know the layer as)
+        layerName = rowAsDict['Technical Title']
+
+        #Add that as a key to the larger md dictionary
+        md[layerName] = {}
+
+        #For all the 
+        for key, value in rowAsDict.iteritems():
+            try:
+                mdItemName = lkpColName_to_mdName[key]
+                md[layerName][mdItemName] = value
+
+            #If the field isn't in our metadata lookup, ignore it
+            except:
+                pass
+            
 
     return md
 
-
 def rebuild_cache(f):
 
-    wks = open_spreadsheet()
-    layers = get_layer_names(wks)
-    md = {}
-    i = 1
-    for layer in layers:
-        i += 1
-        md[layer] = get_metadata(wks, i)
+    #Grab data from the spreadsheet in one request
+    #Comes back as a list of lists
+    gdocAsLists = open_spreadsheet()
+
+    #Parse this data into layerName: {'metadata info': 'value'} format
+    md = gdoc_lists_to_layer_dict(gdocAsLists)
 
     with io.open(f, 'w', encoding='utf8') as cache:
         cache.write(u'{')
@@ -110,9 +133,10 @@ def rebuild_cache(f):
             i += 1
         cache.write(u'}')
 
+    print 'done rebuild'
+
 
 def print_json():
-
 
     abspath = os.path.abspath(__file__)
     dir_name = os.path.dirname(abspath)
@@ -128,8 +152,8 @@ def print_json():
 
     else:
 
-        print "Content-Type: application/json; charset=utf-8"
-        print
+        #Very important to set the header before printing data
+        print "Content-Type: application/json; charset=utf-8\n"
 
         if sys.argv[1] == 'rebuild_cache':
             rebuild_cache(cache_file)
