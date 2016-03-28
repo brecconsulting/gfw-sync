@@ -4,10 +4,9 @@
 # enable debugging
 
 import os
-import json
 import sys
 import gspread
-from oauth2client.client import SignedJwtAssertionCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 import io
 import markdown2
 
@@ -52,9 +51,8 @@ def open_spreadsheet():
     dir_name = os.path.dirname(abspath)
     spreadsheet_file = os.path.join(dir_name, 'spreadsheet.json')
 
-    json_key = json.load(open(spreadsheet_file))
     scope = ['https://spreadsheets.google.com/feeds']
-    credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(spreadsheet_file, scope)
 
     #authorize oauth2client credentials
     gc = gspread.authorize(credentials)
@@ -151,7 +149,10 @@ def print_json():
         print byteify(cache)
 
     else:
-
+        #to test locally on the command line
+        #python metadata_api.py D:\scripts\gfw-sync\api\metadata\wetlands
+        #or python metadata_api.py D:\scripts\gfw-sync\api\metadata
+        
         #Very important to set the header before printing data
         print "Content-Type: application/json; charset=utf-8\n"
 
