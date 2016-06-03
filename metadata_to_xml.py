@@ -72,6 +72,7 @@ metadata.abstract.set(overview)
 metadata.citation.set(citation)
 metadata.language.set(data_language)
 metadata.last_update.set(last_update)
+metadata.scale_resolution.set(resolution)
 
 metadata.finish()
 
